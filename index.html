@@ -1,0 +1,1368 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordonnancement Industriel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #212529;
+            line-height: 1.5;
+        }
+
+        .tab-bar {
+            background: #1e40af;
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 8px 18px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #60a5fa;
+        }
+
+        .sub-tab-bar {
+            background: #e5e7eb;
+            padding: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .sub-tab {
+            padding: 6px 12px;
+            background: #d1d5db;
+            color: #212529;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .sub-tab.active {
+            background: #ffffff;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .gantt-container {
+            margin-top: 10px;
+        }
+
+        .gantt-item {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #1e40af;
+        }
+
+        .machine-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #1e40af;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 200px !important;
+        }
+
+        canvas.expanded {
+            height: 400px !important;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background: #1e40af;
+            color: white;
+            font-weight: 600;
+        }
+
+        button {
+            margin: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        button:hover {
+            background: #0b5ed7;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background: #fff;
+            color: #212529;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .metric-card {
+            background: #fff;
+            padding: 8px;
+            border-radius: 5px;
+            border-left: 4px solid #198754;
+        }
+
+        .metric-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        .checkbox-row {
+            margin-bottom: 8px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-row label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #machineSpeedsContainer {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .speed-input {
+            margin: 4px 0;
+        }
+
+        .speed-input label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .auto-result {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .auto-result h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1em;
+        }
+
+        .auto-result table {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .auto-result th, .auto-result td {
+            padding: 4px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .auto-result th {
+            background: #1e40af;
+            color: white;
+        }
+
+        .auto-result p {
+            margin: 0 0 8px 0;
+            font-size: 0.9em;
+        }
+
+        .jobs-precedences {
+            display: flex;
+            gap: 15px;
+        }
+
+        .jobs-section, .precedences-section {
+            flex: 1;
+        }
+
+        .precedences-section .options-container {
+            margin-top: 12px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .jobs-precedences {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 8px;
+            }
+
+            .tab-bar, .sub-tab-bar {
+                flex-wrap: wrap;
+            }
+
+            canvas {
+                height: 150px !important;
+            }
+
+            canvas.expanded {
+                height: 300px !important;
+            }
+
+            button {
+                padding: 5px 10px;
+                font-size: 0.85em;
+            }
+
+            .metric-card {
+                padding: 6px;
+            }
+
+            .metric-value {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('jobs-precedences')"><i class="fas fa-tasks"></i> Jobs & Précédences</button>
+        <button class="tab" onclick="switchTab('execute')"><i class="fas fa-play"></i> Exécuter</button>
+    </div>
+
+    <div class="container">
+        <div id="jobs-precedences" class="tab-content active">
+            <div class="jobs-precedences">
+                <div class="jobs-section card">
+                    <h2>Liste des Jobs</h2>
+                    <div class="checkbox-row">
+                        <label><input type="checkbox" id="chkProcessingTime" checked> <i class="fas fa-clock"></i> Temps de Traitement</label>
+                        <label><input type="checkbox" id="chkReleaseDate" checked> <i class="fas fa-calendar-plus"></i> Date de Disponibilité</label>
+                        <label><input type="checkbox" id="chkWeight" checked> <i class="fas fa-weight"></i> Poids</label>
+                        <label><input type="checkbox" id="chkDueDate" checked> <i class="fas fa-calendar-check"></i> Date de Livraison</label>
+                    </div>
+                    <table id="jobTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Temps de Traitement</th>
+                                <th>Date de Disponibilité</th>
+                                <th>Poids</th>
+                                <th>Date de Livraison</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobTableBody"></tbody>
+                    </table>
+                    <button id="addJobButton"><i class="fas fa-plus"></i> Ajouter Job</button>
+                    <button id="resetButton"><i class="fas fa-undo"></i> Réinitialiser</button>
+                </div>
+
+                <div class="precedences-section card">
+                    <h2>Précédences et Options</h2>
+                    <h3>Relations de Précédence</h3>
+                    <table id="precedenceTable">
+                        <thead>
+                            <tr>
+                                <th>Job Précédent</th>
+                                <th>Job Suivant</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="precedenceTableBody"></tbody>
+                    </table>
+                    <button id="addPrecedenceButton"><i class="fas fa-plus"></i> Ajouter Précédence</button>
+                    <div class="options-container">
+                        <h3>Options Avancées</h3>
+                        <div class="checkbox-row">
+                            <label><input type="checkbox" id="preemptionCheckbox"> <i class="fas fa-pause"></i> Activer la Préemption</label>
+                            <label><input type="checkbox" id="variableSpeedCheckbox" onchange="toggleVariableSpeeds()"> <i class="fas fa-tachometer-alt"></i> Vitesses Variables</label>
+                        </div>
+                        <div id="machineSpeedsContainer">
+                            <h4>Configuration des Vitesses</h4>
+                            <div id="speedInputs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="execute" class="tab-content">
+            <div class="sub-tab-bar">
+                <button class="sub-tab active" onclick="switchSubTab('single')">Une Seule Machine</button>
+                <button class="sub-tab" onclick="switchSubTab('parallel')">Machines Parallèles</button>
+                <button class="sub-tab" onclick="switchSubTab('jobshop')">Job Shop</button>
+            </div>
+
+            <div id="single" class="sub-tab-content active">
+                <div class="algorithm-section">
+                    <button onclick="runScheduling('single', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                    <button onclick="runScheduling('single', 'EDD')"><i class="fas fa-calendar"></i> EDD</button>
+                    <button onclick="runScheduling('single', 'CR')"><i class="fas fa-balance-scale"></i> CR</button>
+                    <button onclick="runScheduling('single', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
+                    <button onclick="runScheduling('single', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
+                    <button onclick="runScheduling('single', 'EDM')"><i class="fas fa-clock"></i> EDM</button>
+                    <button onclick="runScheduling('single', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
+                    <button onclick="runScheduling('single', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
+                    <button onclick="runScheduling('single', 'ATC')"><i class="fas fa-dollar-sign"></i> ATC</button>
+                    <button onclick="runScheduling('single', 'MOD')"><i class="fas fa-calendar-alt"></i> MOD</button>
+                    <button onclick="runScheduling('single', 'MWKR')"><i class="fas fa-cubes"></i> MWKR</button>
+                    <div class="auto-result" id="autoResultSingle">
+                        <h4>Résultat Automatique</h4>
+                        <select id="autoMetricSingle">
+                            <option value="makespan">Minimiser le Makespan</option>
+                            <option value="tardyJobs">Minimiser le Nombre de Jobs en Retard</option>
+                            <option value="sumCompletion">Minimiser la Somme des Complétions</option>
+                            <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
+                        </select>
+                        <button onclick="autoCalculate('single')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <div id="autoResultSingleText"></div>
+                        <table id="autoComparisonSingle"></table>
+                    </div>
+                </div>
+                <div class="gantt-container" id="ganttContainerSingle"></div>
+                <div id="metricsSingle" class="metrics-grid"></div>
+            </div>
+
+            <div id="parallel" class="sub-tab-content">
+                <div class="algorithm-section">
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="fas fa-sliders-h"></i> Nombre de Machines : 
+                        <input type="number" id="numMachines" value="2" min="1" max="10" step="1" onchange="updateMachineSpeeds()">
+                    </label>
+                    <button onclick="runScheduling('parallel', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                    <button onclick="runScheduling('parallel', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
+                    <button onclick="runScheduling('parallel', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
+                    <button onclick="runScheduling('parallel', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
+                    <button onclick="runScheduling('parallel', 'FCFS')"><i class="fas fa-sort-numeric-down"></i> FCFS</button>
+                    <button onclick="runScheduling('parallel', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
+                    <button onclick="runScheduling('parallel', 'HLF')"><i class="fas fa-layer-group"></i> HLF</button>
+                    <div class="auto-result" id="autoResultParallel">
+                        <h4>Résultat Automatique</h4>
+                        <select id="autoMetricParallel">
+                            <option value="makespan">Minimiser le Makespan</option>
+                            <option value="tardyJobs">Minimiser le Nombre de Jobs en Retard</option>
+                            <option value="sumCompletion">Minimiser la Somme des Complétions</option>
+                            <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
+                        </select>
+                        <button onclick="autoCalculate('parallel')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <div id="autoResultParallelText"></div>
+                        <table id="autoComparisonParallel"></table>
+                    </div>
+                </div>
+                <div class="gantt-container" id="ganttContainerParallel"></div>
+                <div id="metricsParallel" class="metrics-grid"></div>
+            </div>
+
+            <div id="jobshop" class="sub-tab-content">
+                <div class="algorithm-section">
+                    <button onclick="runScheduling('jobshop', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                    <div class="auto-result" id="autoResultJobshop">
+                        <h4>Résultat Automatique</h4>
+                        <select id="autoMetricJobshop">
+                            <option value="makespan">Minimiser le Makespan</option>
+                            <option value="tardyJobs">Minimiser le Nombre de Jobs en Retard</option>
+                            <option value="sumCompletion">Minimiser la Somme des Complétions</option>
+                            <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
+                        </select>
+                        <button onclick="autoCalculate('jobshop')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <div id="autoResultJobshopText"></div>
+                        <table id="autoComparisonJobshop"></table>
+                    </div>
+                </div>
+                <div class="gantt-container" id="ganttContainerJobshop"></div>
+                <div id="metricsJobshop" class="metrics-grid"></div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        let jobs = [
+            { id: 'J1', processing_time: 2, release_date: 0, weight: 1, due_date: 10 },
+            { id: 'J2', processing_time: 3, release_date: 1, weight: 1, due_date: 12 },
+            { id: 'J3', processing_time: 2, release_date: 2, weight: 2, due_date: 15 },
+            { id: 'J4', processing_time: 4, release_date: 0, weight: 3, due_date: 20 },
+            { id: 'J5', processing_time: 3, release_date: 1, weight: 2, due_date: 18 },
+            { id: 'J6', processing_time: 2, release_date: 3, weight: 1, due_date: 14 }
+        ];
+
+        let precedences = [];
+        let attributeChecks = {
+            processing_time: true,
+            release_date: true,
+            weight: true,
+            due_date: true
+        };
+        let machineSpeeds = [1, 1];
+        let charts = {
+            single: [],
+            parallel: [],
+            jobshop: []
+        };
+
+        const industrialColors = [
+            '#1e40af', '#dc2626', '#059669', '#d97706', '#7c3aed',
+            '#db2777', '#0891b2', '#65a30d', '#ca8a04', '#be123c',
+            '#0f766e', '#7c2d12', '#581c87', '#9f1239', '#0e7490'
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('addJobButton').addEventListener('click', addJob);
+            document.getElementById('addPrecedenceButton').addEventListener('click', addPrecedence);
+            document.getElementById('resetButton').addEventListener('click', reset);
+            
+            document.getElementById('chkProcessingTime').addEventListener('change', (e) => updateAttributeCheck('processing_time', e.target.checked));
+            document.getElementById('chkReleaseDate').addEventListener('change', (e) => updateAttributeCheck('release_date', e.target.checked));
+            document.getElementById('chkWeight').addEventListener('change', (e) => updateAttributeCheck('weight', e.target.checked));
+            document.getElementById('chkDueDate').addEventListener('change', (e) => updateAttributeCheck('due_date', e.target.checked));
+            
+            displayJobs();
+            displayPrecedences();
+            updateMachineSpeeds();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function switchSubTab(subTabId) {
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(subTabId).classList.add('active');
+            document.querySelector(`button[onclick="switchSubTab('${subTabId}')"]`).classList.add('active');
+        }
+
+        function updateAttributeCheck(attribute, checked) {
+            attributeChecks[attribute] = checked;
+            displayJobs();
+            clearError();
+        }
+
+        function displayJobs() {
+            const tbody = document.getElementById('jobTableBody');
+            tbody.innerHTML = '';
+            jobs.forEach(job => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${job.id}</strong></td>
+                    <td><input type="number" min="0.1" step="0.1" value="${job.processing_time}" oninput="updateJob('${job.id}', 'processing_time', this.value)" ${!attributeChecks.processing_time ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" step="0.1" value="${job.release_date}" oninput="updateJob('${job.id}', 'release_date', this.value)" ${!attributeChecks.release_date ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0.1" step="0.1" value="${job.weight}" oninput="updateJob('${job.id}', 'weight', this.value)" ${!attributeChecks.weight ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" step="0.1" value="${job.due_date}" oninput="updateJob('${job.id}', 'due_date', this.value)" ${!attributeChecks.due_date ? 'disabled' : ''}></td>
+                    <td><button onclick="removeJob('${job.id}')" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayPrecedences() {
+            const tbody = document.getElementById('precedenceTableBody');
+            tbody.innerHTML = '';
+            if (precedences.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="3" style="color: #64748b; font-style: italic;">Aucune relation de précédence définie.</td>';
+                tbody.appendChild(row);
+                return;
+            }
+            precedences.forEach((prec, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${prec.predecessor}" oninput="updatePrecedence(${index}, 'predecessor', this.value)"></td>
+                    <td><input type="text" value="${prec.job}" oninput="updatePrecedence(${index}, 'job', this.value)"></td>
+                    <td><button onclick="removePrecedence(${index})" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateJob(id, field, value) {
+            if (!attributeChecks[field]) return;
+            const job = jobs.find(j => j.id === id);
+            const parsedValue = parseFloat(value);
+            if (!isNaN(parsedValue) && parsedValue >= (field === 'processing_time' || field === 'weight' ? 0.1 : 0)) {
+                job[field] = parsedValue;
+                clearError();
+            } else {
+                showError(`Valeur invalide pour ${field} du job ${id}.`);
+            }
+        }
+
+        function updatePrecedence(index, field, value) {
+            const parsedValue = value.trim().toUpperCase();
+            if (jobs.some(j => j.id === parsedValue)) {
+                precedences[index][field] = parsedValue;
+                clearError();
+            } else {
+                showError(`ID de job invalide pour ${field} à l'index ${index}.`);
+            }
+            displayPrecedences();
+        }
+
+        function addJob() {
+            const newId = String.fromCharCode(65 + jobs.length);
+            jobs.push({ id: newId, processing_time: 1, release_date: 0, weight: 1, due_date: 10 });
+            displayJobs();
+        }
+
+        function removeJob(id) {
+            if (jobs.length <= 1) {
+                showError("Vous devez conserver au moins un job.");
+                return;
+            }
+            jobs = jobs.filter(job => job.id !== id);
+            precedences = precedences.filter(prec => prec.job !== id && prec.predecessor !== id);
+            displayJobs();
+            displayPrecedences();
+            clearError();
+        }
+
+        function addPrecedence() {
+            if (jobs.length < 2) {
+                showError("Vous devez avoir au moins deux jobs pour définir une relation de précédence.");
+                return;
+            }
+            precedences.push({ job: jobs[0].id, predecessor: jobs[1].id });
+            displayPrecedences();
+        }
+
+        function removePrecedence(index) {
+            precedences.splice(index, 1);
+            displayPrecedences();
+        }
+
+        function reset() {
+            jobs = [
+                { id: 'J1', processing_time: 2, release_date: 0, weight: 1, due_date: 10 },
+                { id: 'J2', processing_time: 3, release_date: 1, weight: 1, due_date: 12 },
+                { id: 'J3', processing_time: 2, release_date: 2, weight: 2, due_date: 15 },
+                { id: 'J4', processing_time: 4, release_date: 0, weight: 3, due_date: 20 },
+                { id: 'J5', processing_time: 3, release_date: 1, weight: 2, due_date: 18 },
+                { id: 'J6', processing_time: 2, release_date: 3, weight: 1, due_date: 14 }
+            ];
+            precedences = [];
+            machineSpeeds = [1, 1];
+            displayJobs();
+            displayPrecedences();
+            updateMachineSpeeds();
+            clearError();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function clearError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.style.display = 'none';
+        }
+
+        function canExecute(job, completedJobs) {
+            const predecessors = precedences.filter(p => p.job === job.id).map(p => p.predecessor);
+            return predecessors.every(pred => completedJobs.includes(pred));
+        }
+
+        function compareJobs(a, b, rule, current_time) {
+            let ruleValueA, ruleValueB;
+
+            if (rule === 'SPT' && attributeChecks.processing_time) {
+                ruleValueA = a.processing_time || a.remaining_time;
+                ruleValueB = b.processing_time || b.remaining_time;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'EDD' && attributeChecks.due_date) {
+                ruleValueA = a.due_date;
+                ruleValueB = b.due_date;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'CR' && attributeChecks.processing_time && attributeChecks.weight) {
+                ruleValueA = (a.processing_time || a.remaining_time) / a.weight;
+                ruleValueB = (b.processing_time || b.remaining_time) / b.weight;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'WSPT' && attributeChecks.weight && attributeChecks.processing_time) {
+                ruleValueA = a.weight / (a.processing_time || a.remaining_time);
+                ruleValueB = b.weight / (b.processing_time || b.remaining_time);
+                return ruleValueB - ruleValueA;
+            } else if (rule === 'LPT' && attributeChecks.processing_time) {
+                ruleValueA = a.processing_time || a.remaining_time;
+                ruleValueB = b.processing_time || b.remaining_time;
+                return ruleValueB - ruleValueA;
+            } else if (rule === 'EDM' && attributeChecks.release_date) {
+                ruleValueA = a.release_date;
+                ruleValueB = b.release_date;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'LST' && attributeChecks.due_date && attributeChecks.processing_time) {
+                ruleValueA = a.due_date - (a.processing_time || a.remaining_time) - current_time;
+                ruleValueB = b.due_date - (b.processing_time || b.remaining_time) - current_time;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'SRPT' && attributeChecks.processing_time) {
+                ruleValueA = a.remaining_time || a.processing_time;
+                ruleValueB = b.remaining_time || b.processing_time;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'ATC' && attributeChecks.due_date && attributeChecks.processing_time && attributeChecks.weight) {
+                const avgProcessingTime = jobs.reduce((sum, job) => sum + (job.processing_time || job.remaining_time), 0) / jobs.length;
+                const k = 2;
+                ruleValueA = (a.weight / (a.processing_time || a.remaining_time)) * Math.exp(-Math.max(0, (a.due_date - (a.processing_time || a.remaining_time) - current_time)) / (k * avgProcessingTime));
+                ruleValueB = (b.weight / (b.processing_time || b.remaining_time)) * Math.exp(-Math.max(0, (b.due_date - (b.processing_time || b.remaining_time) - current_time)) / (k * avgProcessingTime));
+                return ruleValueB - ruleValueA;
+            } else if (rule === 'MOD' && attributeChecks.due_date && attributeChecks.processing_time) {
+                ruleValueA = Math.max(a.due_date, current_time + (a.processing_time || a.remaining_time));
+                ruleValueB = Math.max(b.due_date, current_time + (b.processing_time || b.remaining_time));
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'MWKR' && attributeChecks.processing_time) {
+                ruleValueA = a.processing_time || a.remaining_time;
+                ruleValueB = b.processing_time || b.remaining_time;
+                return ruleValueB - ruleValueA;
+            } else if (rule === 'FCFS' && attributeChecks.release_date) {
+                ruleValueA = a.release_date;
+                ruleValueB = b.release_date;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'HLF' && attributeChecks.processing_time) {
+                const getLevel = (job) => {
+                    let level = job.processing_time;
+                    const predecessors = precedences.filter(p => p.job === job.id).map(p => jobs.find(j => j.id === p.predecessor));
+                    if (predecessors.length > 0) {
+                        level += Math.max(...predecessors.map(getLevel));
+                    }
+                    return level;
+                };
+                ruleValueA = getLevel(a);
+                ruleValueB = getLevel(b);
+                return ruleValueB - ruleValueA;
+            }
+
+            return 0;
+        }
+
+        function singleMachineScheduling(jobs, rule, allowPreemption) {
+            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
+                showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
+                return [];
+            }
+
+            if (!allowPreemption) {
+                let schedule = [];
+                let current_time = 0;
+                let remaining_jobs = JSON.parse(JSON.stringify(jobs));
+                let completed_jobs = [];
+
+                while (remaining_jobs.length) {
+                    let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time && canExecute(j, completed_jobs));
+                    if (!available_jobs.length) {
+                        current_time = Math.min(...remaining_jobs.map(j => j.release_date));
+                        continue;
+                    }
+
+                    let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time))[0];
+
+                    let start_time = Math.max(current_time, selected_job.release_date);
+                    schedule.push({
+                        job_id: selected_job.id,
+                        start: start_time,
+                        duration: selected_job.processing_time,
+                        machine: 0
+                    });
+                    current_time = start_time + selected_job.processing_time;
+                    completed_jobs.push(selected_job.id);
+                    remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id);
+                }
+                return schedule;
+            } else {
+                let schedule = [];
+                let remaining_jobs = JSON.parse(JSON.stringify(jobs)).map(job => ({
+                    ...job,
+                    remaining_time: job.processing_time
+                }));
+                let current_time = 0;
+                let completed_jobs = [];
+
+                while (remaining_jobs.length) {
+                    let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time && j.remaining_time > 0 && canExecute(j, completed_jobs));
+                    if (!available_jobs.length) {
+                        current_time += 1;
+                        continue;
+                    }
+
+                    let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time))[0];
+
+                    schedule.push({
+                        job_id: selected_job.id,
+                        start: current_time,
+                        duration: 1,
+                        machine: 0
+                    });
+                    selected_job.remaining_time -= 1;
+                    current_time += 1;
+
+                    if (selected_job.remaining_time <= 0) {
+                        completed_jobs.push(selected_job.id);
+                        remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id || j.remaining_time > 0);
+                    }
+                }
+                return schedule;
+            }
+        }
+
+        function parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, speeds) {
+            if (!attributeChecks.processing_time) {
+                showError("Temps de Traitement doit être coché.");
+                return [];
+            }
+
+            for (let job of jobs) {
+                if (job.processing_time === undefined || job.processing_time <= 0) {
+                    showError(`Temps de Traitement invalide pour le job ${job.id}.`);
+                    return [];
+                }
+            }
+
+            if (!num_machines || num_machines < 1 || isNaN(num_machines)) {
+                showError("Le nombre de machines doit être un entier ≥ 1.");
+                return [];
+            }
+
+            let adjustedJobs = JSON.parse(JSON.stringify(jobs)).map(job => ({
+                ...job,
+                original_processing_time: job.processing_time,
+                processing_time: job.processing_time
+            }));
+
+            if (!allowPreemption) {
+                let schedule = [];
+                let remaining_jobs = JSON.parse(JSON.stringify(adjustedJobs));
+                let completed_jobs = [];
+                let machines = Array(num_machines).fill(null).map((_, index) => ({
+                    id: index,
+                    free_at: 0,
+                    speed: speeds[index] || 1
+                }));
+
+                while (remaining_jobs.length > 0) {
+                    let earliest_time = Math.min(...machines.map(m => m.free_at));
+                    let available_machines = machines.filter(m => m.free_at === earliest_time);
+                    let current_time = earliest_time;
+
+                    let available_jobs = remaining_jobs.filter(job => canExecute(job, completed_jobs));
+
+                    if (available_jobs.length === 0) {
+                        if (remaining_jobs.length > 0) {
+                            current_time = Math.min(...machines.map(m => m.free_at));
+                            machines.forEach(m => {
+                                if (m.free_at < current_time) m.free_at = current_time;
+                            });
+                        }
+                        continue;
+                    }
+
+                    available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time));
+
+                    let jobs_to_assign = Math.min(available_jobs.length, available_machines.length);
+                    for (let i = 0; i < jobs_to_assign; i++) {
+                        let job = available_jobs[i];
+                        let machine = available_machines[i];
+                        let start_time = machine.free_at;
+
+                        let adjusted_duration = job.original_processing_time / machine.speed;
+
+                        schedule.push({
+                            job_id: job.id,
+                            start: start_time,
+                            duration: adjusted_duration,
+                            machine: machine.id
+                        });
+
+                        machine.free_at = start_time + adjusted_duration;
+                        completed_jobs.push(job.id);
+                    }
+
+                    remaining_jobs = remaining_jobs.filter(job => !completed_jobs.includes(job.id));
+                }
+
+                return schedule;
+            } else {
+                let schedule = [];
+                let remaining_jobs = JSON.parse(JSON.stringify(adjustedJobs)).map(job => ({
+                    ...job,
+                    remaining_time: job.original_processing_time
+                }));
+                let completed_jobs = [];
+                let machines = Array(num_machines).fill(null).map((_, index) => ({
+                    id: index,
+                    free_at: 0,
+                    current_job: null,
+                    speed: speeds[index] || 1
+                }));
+                let current_time = 0;
+                let maxIterations = 10000;
+                let iteration = 0;
+
+                while (remaining_jobs.length > 0 && iteration < maxIterations) {
+                    let available_machines = machines.filter(m => m.free_at <= current_time);
+                    if (available_machines.length === 0) {
+                        current_time = Math.min(...machines.map(m => m.free_at));
+                        continue;
+                    }
+
+                    let available_jobs = remaining_jobs.filter(job => job.remaining_time > 0 && canExecute(job, completed_jobs));
+                    if (available_jobs.length === 0) {
+                        current_time += 1;
+                        iteration++;
+                        continue;
+                    }
+
+                    available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time));
+
+                    for (let machine of available_machines) {
+                        if (available_jobs.length === 0) break;
+
+                        let selected_job = available_jobs[0];
+
+                        if (machine.current_job) {
+                            let currentJob = remaining_jobs.find(j => j.id === machine.current_job);
+                            if (currentJob && compareJobs(currentJob, selected_job, rule, current_time) > 0) {
+                                available_jobs.push(currentJob);
+                                machine.current_job = null;
+                            } else {
+                                continue;
+                            }
+                        }
+
+                        let adjusted_duration = 1 / machine.speed;
+
+                        schedule.push({
+                            job_id: selected_job.id,
+                            start: current_time,
+                            duration: 1,
+                            machine: machine.id
+                        });
+
+                        selected_job.remaining_time -= adjusted_duration;
+                        machine.free_at = current_time + 1;
+                        machine.current_job = selected_job.id;
+
+                        if (selected_job.remaining_time <= 0) {
+                            completed_jobs.push(selected_job.id);
+                            machine.current_job = null;
+                        }
+
+                        available_jobs = available_jobs.filter(j => j.id !== selected_job.id || j.remaining_time > 0);
+                        remaining_jobs = remaining_jobs.filter(j => j.remaining_time > 0);
+                    }
+
+                    current_time += 1;
+                    iteration++;
+                }
+
+                if (iteration >= maxIterations) {
+                    showError("Boucle infinie détectée.");
+                    return [];
+                }
+
+                return schedule;
+            }
+        }
+
+        function jobShopScheduling(jobs, rule) {
+            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
+                showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
+                return [];
+            }
+
+            let schedule = [];
+            let machine_free_time = [0, 0];
+            let remaining_jobs = JSON.parse(JSON.stringify(jobs));
+            let completed_jobs = [];
+
+            while (remaining_jobs.length) {
+                let available_jobs = remaining_jobs.filter(j => j.release_date <= Math.min(...machine_free_time) && canExecute(j, completed_jobs));
+                if (!available_jobs.length) continue;
+
+                let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, Math.min(...machine_free_time)))[0];
+
+                for (let machine_id = 0; machine_id < 2; machine_id++) {
+                    let start_time = Math.max(machine_free_time[machine_id], selected_job.release_date);
+                    schedule.push({
+                        job_id: selected_job.id,
+                        start: start_time,
+                        duration: selected_job.processing_time,
+                        machine: machine_id
+                    });
+                    machine_free_time[machine_id] = start_time + selected_job.processing_time;
+                }
+
+                completed_jobs.push(selected_job.id);
+                remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id);
+            }
+            return schedule;
+        }
+
+        function calculateMetrics(schedule, jobs, type) {
+            const completionTimes = {};
+            schedule.forEach(task => {
+                const jobId = task.job_id;
+                const completionTime = task.start + task.duration;
+                if (type === 'jobshop') {
+                    if (!completionTimes[jobId] || completionTime > completionTimes[jobId]) {
+                        completionTimes[jobId] = completionTime;
+                    }
+                } else {
+                    if (!completionTimes[jobId] || completionTime > completionTimes[jobId]) {
+                        completionTimes[jobId] = completionTime;
+                    }
+                }
+            });
+
+            const makespan = Math.max(...Object.values(completionTimes));
+            let tardyJobs = 0, sumCompletion = 0, meanTardiness = 0;
+            if (attributeChecks.due_date) {
+                let totalTardiness = 0, numJobs = jobs.length;
+                jobs.forEach(job => {
+                    const completionTime = completionTimes[job.id];
+                    const tardiness = Math.max(0, completionTime - job.due_date);
+                    if (tardiness > 0) tardyJobs++;
+                    totalTardiness += tardiness;
+                    sumCompletion += completionTime;
+                });
+                meanTardiness = numJobs > 0 ? totalTardiness / numJobs : 0;
+            } else {
+                jobs.forEach(job => {
+                    sumCompletion += completionTimes[job.id];
+                });
+            }
+
+            return {
+                makespan: makespan.toFixed(2),
+                tardyJobs,
+                sumCompletion: sumCompletion.toFixed(2),
+                meanTardiness: meanTardiness.toFixed(2)
+            };
+        }
+
+        function displayMetrics(metrics, type) {
+            const metricsGrid = document.getElementById(`metrics${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            metricsGrid.innerHTML = `
+                <div class="metric-card">
+                    <h4>Makespan (Cmax)</h4>
+                    <p class="metric-value">${metrics.makespan}</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Jobs en Retard</h4>
+                    <p class="metric-value">${metrics.tardyJobs}</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Somme des Complétions</h4>
+                    <p class="metric-value">${metrics.sumCompletion}</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Moyenne des Retards</h4>
+                    <p class="metric-value">${metrics.meanTardiness}</p>
+                </div>
+            `;
+        }
+
+        function drawGantt(schedule, title, num_machines, type) {
+            charts[type].forEach(chart => chart.destroy());
+            charts[type] = [];
+            const ganttContainer = document.getElementById(`ganttContainer${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            ganttContainer.innerHTML = '';
+
+            if (!schedule || schedule.length === 0) {
+                showError("Aucune donnée d'ordonnancement à afficher.");
+                return;
+            }
+
+            const makespan = schedule.reduce((max, task) => {
+                return Math.max(max, task.start + task.duration);
+            }, 0);
+
+            const uniqueJobs = [...new Set(schedule.map(task => task.job_id))];
+
+            for (let machine = 0; machine < num_machines; machine++) {
+                const machineSchedule = schedule.filter(task => task.machine === machine);
+                if (machineSchedule.length === 0) continue;
+
+                const div = document.createElement('div');
+                div.className = 'gantt-item';
+                div.innerHTML = `
+                    <div class="machine-header">
+                        Machine ${machine + 1}
+                        <button onclick="toggleGantt(this.parentElement.nextElementSibling)" style="margin-left: auto; background: #198754;">
+                            <i class="fas fa-expand"></i> Détails
+                        </button>
+                    </div>
+                    <canvas id="ganttChart${type}${machine}"></canvas>
+                `;
+                ganttContainer.appendChild(div);
+
+                const ctx = document.getElementById(`ganttChart${type}${machine}`).getContext('2d');
+                const datasets = [];
+                const jobSegments = {};
+
+                machineSchedule.forEach(task => {
+                    if (!jobSegments[task.job_id]) {
+                        jobSegments[task.job_id] = [];
+                    }
+                    jobSegments[task.job_id].push({
+                        x: [task.start, task.start + task.duration],
+                        y: machine + 1
+                    });
+                });
+
+                Object.keys(jobSegments).forEach(jobId => {
+                    const colorIndex = uniqueJobs.indexOf(jobId) % industrialColors.length;
+                    datasets.push({
+                        label: `Job ${jobId}`,
+                        data: jobSegments[jobId],
+                        backgroundColor: industrialColors[colorIndex],
+                        borderColor: industrialColors[colorIndex],
+                        borderWidth: 1,
+                        barPercentage: 0.9,
+                        categoryPercentage: 1.0
+                    });
+                });
+
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { datasets },
+                    options: {
+                        indexAxis: 'y',
+                        plugins: {
+                            title: { display: true, text: title, font: { size: 14 } },
+                            legend: { position: 'top', labels: { boxWidth: 10, padding: 5 } }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                min: 0,
+                                max: Math.ceil(makespan) + 1,
+                                title: { display: true, text: 'Temps (unités)', font: { size: 12 } },
+                                ticks: { stepSize: 1 }
+                            },
+                            y: {
+                                title: { display: false },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value <= num_machines ? `M${value}` : '';
+                                    }
+                                },
+                                min: 0.5,
+                                max: num_machines + 0.5
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { left: 5, right: 5, top: 5, bottom: 5 } }
+                    }
+                });
+                charts[type].push(chart);
+            }
+        }
+
+        function toggleGantt(canvas) {
+            canvas.classList.toggle('expanded');
+            const chartInstance = Chart.getChart(canvas);
+            if (chartInstance) chartInstance.resize();
+        }
+
+        function toggleVariableSpeeds() {
+            const checkbox = document.getElementById('variableSpeedCheckbox');
+            const container = document.getElementById('machineSpeedsContainer');
+            container.style.display = checkbox.checked ? 'block' : 'none';
+            if (checkbox.checked) {
+                updateMachineSpeeds();
+            } else {
+                const numMachines = parseInt(document.getElementById('numMachines').value) || 2;
+                machineSpeeds = Array(numMachines).fill(1);
+            }
+        }
+
+        function updateMachineSpeeds() {
+            const numMachines = parseInt(document.getElementById('numMachines').value) || 2;
+            const container = document.getElementById('speedInputs');
+            container.innerHTML = '';
+
+            machineSpeeds = Array(numMachines).fill(1);
+
+            if (document.getElementById('variableSpeedCheckbox').checked) {
+                for (let i = 0; i < numMachines; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'speed-input';
+                    div.innerHTML = `
+                        <label>
+                            Vitesse Machine ${i + 1} : 
+                            <input type="number" min="0.1" step="0.1" value="1" onchange="updateMachineSpeed(${i}, this.value)">
+                        </label>
+                    `;
+                    container.appendChild(div);
+                }
+            }
+        }
+
+        function updateMachineSpeed(machineId, value) {
+            const speed = parseFloat(value);
+            if (!isNaN(speed) && speed >= 0.1) {
+                machineSpeeds[machineId] = speed;
+                clearError();
+            } else {
+                showError(`Vitesse invalide pour la machine ${machineId + 1}.`);
+            }
+        }
+
+        function runScheduling(type, rule) {
+            const allowPreemption = document.getElementById('preemptionCheckbox').checked;
+            let schedule, title, num_machines = 1;
+
+            if (type === 'single') {
+                schedule = singleMachineScheduling(jobs, rule, allowPreemption);
+                title = `Une Seule Machine - ${rule}${allowPreemption ? ' (Préemption)' : ''}`;
+            } else if (type === 'parallel') {
+                num_machines = parseInt(document.getElementById('numMachines').value) || 2;
+                if (num_machines < 1) {
+                    showError("Le nombre de machines doit être ≥ 1.");
+                    return;
+                }
+                schedule = parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, machineSpeeds);
+                title = `Machines Parallèles (${num_machines} machines) - ${rule}${allowPreemption ? ' (Préemption)' : ''}`;
+            } else if (type === 'jobshop') {
+                schedule = jobShopScheduling(jobs, rule);
+                title = `Job Shop - ${rule}`;
+                num_machines = 2;
+            }
+
+            if (schedule.length > 0) {
+                drawGantt(schedule, title, num_machines, type);
+                const metrics = calculateMetrics(schedule, jobs, type);
+                displayMetrics(metrics, type);
+            }
+        }
+
+        function autoCalculate(type) {
+            const autoResultText = document.getElementById(`autoResult${type.charAt(0).toUpperCase() + type.slice(1)}Text`);
+            const autoComparison = document.getElementById(`autoComparison${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const metricSelect = document.getElementById(`autoMetric${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const selectedMetric = metricSelect.value;
+
+            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
+                showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
+                return;
+            }
+            if ((selectedMetric === 'tardyJobs' || selectedMetric === 'meanTardiness') && !attributeChecks.due_date) {
+                showError("La Date de Livraison doit être cochée pour calculer les retards.");
+                return;
+            }
+
+            const allowPreemption = document.getElementById('preemptionCheckbox').checked;
+            let rules, num_machines = 1;
+            if (type === 'single') {
+                rules = ['SPT', 'EDD', 'CR', 'WSPT', 'LPT', 'EDM', 'LST', 'SRPT', 'ATC', 'MOD', 'MWKR'];
+            } else if (type === 'parallel') {
+                num_machines = parseInt(document.getElementById('numMachines').value) || 2;
+                if (num_machines < 1) {
+                    showError("Le nombre de machines doit être ≥ 1.");
+                    return;
+                }
+                rules = ['SPT', 'WSPT', 'LPT', 'LST', 'FCFS', 'SRPT', 'HLF'];
+            } else if (type === 'jobshop') {
+                num_machines = 2;
+                rules = ['SPT'];
+            }
+
+            let bestRule = null;
+            let bestValue = Infinity;
+            const results = {};
+
+            rules.forEach(rule => {
+                let schedule;
+                if (type === 'single') {
+                    schedule = singleMachineScheduling(jobs, rule, allowPreemption);
+                } else if (type === 'parallel') {
+                    schedule = parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, machineSpeeds);
+                } else if (type === 'jobshop') {
+                    schedule = jobShopScheduling(jobs, rule);
+                }
+
+                if (schedule.length > 0) {
+                    const metrics = calculateMetrics(schedule, jobs, type);
+                    results[rule] = metrics;
+                    const value = metrics[selectedMetric];
+                    if (value < bestValue) {
+                        bestValue = value;
+                        bestRule = rule;
+                    }
+                }
+            });
+
+            if (bestRule) {
+                autoResultText.innerHTML = `
+                    <p>Meilleure règle : <strong>${bestRule}</strong> avec un ${selectedMetric === 'makespan' ? 'Makespan' : selectedMetric === 'tardyJobs' ? 'Nombre de Jobs en Retard' : selectedMetric === 'sumCompletion' ? 'Somme des Complétions' : 'Moyenne des Retards'} de <strong>${bestValue}</strong>.
+                    <button onclick="applyBestRule('${type}', '${bestRule}')" style="background: #198754; margin-left: 10px;"><i class="fas fa-check"></i> Appliquer</button></p>
+                `;
+
+                let comparisonHtml = '<tr><th>Règle</th><th>Makespan</th><th>Jobs en Retard</th><th>Somme des Complétions</th><th>Moyenne des Retards</th></tr>';
+                Object.keys(results).forEach(rule => {
+                    const metrics = results[rule];
+                    comparisonHtml += `<tr>
+                        <td>${rule}</td>
+                        <td>${metrics.makespan}</td>
+                        <td>${metrics.tardyJobs}</td>
+                        <td>${metrics.sumCompletion}</td>
+                        <td>${metrics.meanTardiness}</td>
+                    </tr>`;
+                });
+                autoComparison.innerHTML = comparisonHtml;
+            } else {
+                autoResultText.textContent = "Aucune règle valide n'a pu être calculée.";
+            }
+        }
+
+        function applyBestRule(type, bestRule) {
+            runScheduling(type, bestRule);
+        }
+    </script>
+</body>
+</html>
