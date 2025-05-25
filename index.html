@@ -47,7 +47,7 @@
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f8f9fa;
@@ -55,10 +55,20 @@
             line-height: 1.5;
         }
 
+        .header {
+            background: #1e40af;
+            padding: 12px;
+            color: white;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
         .tab-bar {
             background: #1e40af;
             padding: 8px;
             display: flex;
+            justify-content: center;
             gap: 8px;
             border-bottom: 2px solid #dee2e6;
         }
@@ -77,27 +87,6 @@
             background: #60a5fa;
         }
 
-        .sub-tab-bar {
-            background: #e5e7eb;
-            padding: 5px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .sub-tab {
-            padding: 6px 12px;
-            background: #d1d5db;
-            color: #212529;
-            border: none;
-            border-radius: 5px 5px 0 0;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .sub-tab.active {
-            background: #ffffff;
-        }
-
         .container {
             padding: 15px;
             max-width: 1400px;
@@ -112,32 +101,28 @@
             display: block;
         }
 
-        .sub-tab-content {
-            display: none;
-        }
-
-        .sub-tab-content.active {
-            display: block;
-        }
-
         .card {
             background: #ffffff;
-            border: 1px solid #dee2e6;
+            border: 1px solid #d3d3d3;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .gantt-container {
-            margin-top: 10px;
+            margin: 20px 0;
+            text-align: center;
         }
 
         .gantt-item {
             background: #ffffff;
             border-radius: 8px;
             padding: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #1e40af;
+            margin: 0 auto 12px auto;
+            max-width: 1000px;
+            border: 1px solid #d3d3d3;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .machine-header {
@@ -154,11 +139,12 @@
 
         canvas {
             width: 100% !important;
-            height: 200px !important;
+            height: 250px !important;
+            background: #f5f6fa;
         }
 
         canvas.expanded {
-            height: 400px !important;
+            height: 450px !important;
         }
 
         table {
@@ -168,7 +154,7 @@
         }
 
         th, td {
-            border: 1px solid #dee2e6;
+            border: 1px solid #d3d3d3;
             padding: 6px;
             text-align: center;
         }
@@ -194,14 +180,22 @@
             gap: 4px;
         }
 
+        button.optimize {
+            background: #0d6efd;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            margin: 10px auto;
+            display: block;
+        }
+
         button:hover {
             background: #0b5ed7;
         }
 
-        input[type="number"] {
+        input[type="number"], input[type="text"] {
             width: 70px;
             padding: 6px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #d3d3d3;
             border-radius: 5px;
             background: #fff;
             color: #212529;
@@ -215,24 +209,31 @@
             background: rgba(220, 53, 69, 0.1);
             border-radius: 5px;
             border-left: 4px solid #dc3545;
+            text-align: center;
         }
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
             margin-top: 8px;
         }
 
         .metric-card {
             background: #fff;
-            padding: 8px;
+            padding: 6px;
             border-radius: 5px;
             border-left: 4px solid #198754;
+            text-align: center;
+        }
+
+        .metric-card h4 {
+            margin: 0;
+            font-size: 0.9em;
         }
 
         .metric-value {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 700;
             color: #1e40af;
         }
@@ -250,39 +251,22 @@
             gap: 4px;
         }
 
-        #machineSpeedsContainer {
-            display: none;
-            margin-top: 8px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
-        }
-
-        .speed-input {
-            margin: 4px 0;
-        }
-
-        .speed-input label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .algorithm-section {
             margin-bottom: 12px;
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
+            justify-content: center;
         }
 
         .auto-result {
-            margin-top: 8px;
+            margin: 12px auto;
             padding: 8px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #d3d3d3;
             border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
+            max-width: 800px;
+            background: #ffffff;
+            text-align: center;
         }
 
         .auto-result h4 {
@@ -311,23 +295,43 @@
             font-size: 0.9em;
         }
 
-        .jobs-precedences {
+        .job-section {
             display: flex;
             gap: 15px;
         }
 
-        .jobs-section, .precedences-section {
+        .job-input, .job-output {
             flex: 1;
         }
 
-        .precedences-section .options-container {
+        .operations-container {
+            margin-top: 8px;
+        }
+
+        .operation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .setup-times-container {
             margin-top: 12px;
-            border-top: 1px solid #dee2e6;
-            padding-top: 12px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #d3d3d3;
+        }
+
+        .setup-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         @media (max-width: 768px) {
-            .jobs-precedences {
+            .job-section {
                 flex-direction: column;
             }
 
@@ -335,7 +339,7 @@
                 padding: 8px;
             }
 
-            .tab-bar, .sub-tab-bar {
+            .tab-bar {
                 flex-wrap: wrap;
             }
 
@@ -353,33 +357,41 @@
             }
 
             .metric-card {
-                padding: 6px;
+                padding: 4px;
             }
 
             .metric-value {
-                font-size: 1em;
+                font-size: 0.9em;
+            }
+
+            .gantt-item {
+                max-width: 100%;
             }
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        Ordonnancement Industriel
+    </div>
     <div class="tab-bar">
-        <button class="tab active" onclick="switchTab('jobs-precedences')"><i class="fas fa-tasks"></i> Jobs & Précédences</button>
-        <button class="tab" onclick="switchTab('execute')"><i class="fas fa-play"></i> Exécuter</button>
+        <button class="tab active" onclick="switchTab('single')"><i class="fas fa-cog"></i> Une Seule Machine</button>
+        <button class="tab" onclick="switchTab('parallel')"><i class="fas fa-cogs"></i> Machines Parallèles</button>
+        <button class="tab" onclick="switchTab('jobshop')"><i class="fas fa-industry"></i> Job Shop</button>
     </div>
 
     <div class="container">
-        <div id="jobs-precedences" class="tab-content active">
-            <div class="jobs-precedences">
-                <div class="jobs-section card">
-                    <h2>Liste des Jobs</h2>
+        <div id="single" class="tab-content active">
+            <div class="job-section">
+                <div class="job-input card">
+                    <h2>Configurer les Jobs</h2>
                     <div class="checkbox-row">
-                        <label><input type="checkbox" id="chkProcessingTime" checked> <i class="fas fa-clock"></i> Temps de Traitement</label>
-                        <label><input type="checkbox" id="chkReleaseDate" checked> <i class="fas fa-calendar-plus"></i> Date de Disponibilité</label>
-                        <label><input type="checkbox" id="chkWeight" checked> <i class="fas fa-weight"></i> Poids</label>
-                        <label><input type="checkbox" id="chkDueDate" checked> <i class="fas fa-calendar-check"></i> Date de Livraison</label>
+                        <label><input type="checkbox" id="chkProcessingTimeSingle" checked> <i class="fas fa-clock"></i> Temps de Traitement</label>
+                        <label><input type="checkbox" id="chkReleaseDateSingle" checked> <i class="fas fa-calendar-plus"></i> Date de Disponibilité</label>
+                        <label><input type="checkbox" id="chkWeightSingle" checked> <i class="fas fa-weight"></i> Poids</label>
+                        <label><input type="checkbox" id="chkDueDateSingle" checked> <i class="fas fa-calendar-check"></i> Date de Livraison</label>
                     </div>
-                    <table id="jobTable">
+                    <table id="jobTableSingle">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -390,61 +402,25 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="jobTableBody"></tbody>
+                        <tbody id="jobTableBodySingle"></tbody>
                     </table>
-                    <button id="addJobButton"><i class="fas fa-plus"></i> Ajouter Job</button>
-                    <button id="resetButton"><i class="fas fa-undo"></i> Réinitialiser</button>
+                    <button id="addJobButtonSingle"><i class="fas fa-plus"></i> Ajouter Job</button>
+                    <button id="resetButtonSingle"><i class="fas fa-undo"></i> Réinitialiser</button>
                 </div>
-
-                <div class="precedences-section card">
-                    <h2>Précédences et Options</h2>
-                    <h3>Relations de Précédence</h3>
-                    <table id="precedenceTable">
-                        <thead>
-                            <tr>
-                                <th>Job Précédent</th>
-                                <th>Job Suivant</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="precedenceTableBody"></tbody>
-                    </table>
-                    <button id="addPrecedenceButton"><i class="fas fa-plus"></i> Ajouter Précédence</button>
-                    <div class="options-container">
-                        <h3>Options Avancées</h3>
-                        <div class="checkbox-row">
-                            <label><input type="checkbox" id="preemptionCheckbox"> <i class="fas fa-pause"></i> Activer la Préemption</label>
-                            <label><input type="checkbox" id="variableSpeedCheckbox" onchange="toggleVariableSpeeds()"> <i class="fas fa-tachometer-alt"></i> Vitesses Variables</label>
-                        </div>
-                        <div id="machineSpeedsContainer">
-                            <h4>Configuration des Vitesses</h4>
-                            <div id="speedInputs"></div>
-                        </div>
+                <div class="job-output">
+                    <div class="algorithm-section">
+                        <button onclick="runScheduling('single', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                        <button onclick="runScheduling('single', 'EDD')"><i class="fas fa-calendar"></i> EDD</button>
+                        <button onclick="runScheduling('single', 'CR')"><i class="fas fa-balance-scale"></i> CR</button>
+                        <button onclick="runScheduling('single', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
+                        <button onclick="runScheduling('single', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
+                        <button onclick="runScheduling('single', 'EDM')"><i class="fas fa-clock"></i> EDM</button>
+                        <button onclick="runScheduling('single', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
+                        <button onclick="runScheduling('single', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
+                        <button onclick="runScheduling('single', 'ATC')"><i class="fas fa-dollar-sign"></i> ATC</button>
+                        <button onclick="runScheduling('single', 'MOD')"><i class="fas fa-calendar-alt"></i> MOD</button>
+                        <button onclick="runScheduling('single', 'MWKR')"><i class="fas fa-cubes"></i> MWKR</button>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="execute" class="tab-content">
-            <div class="sub-tab-bar">
-                <button class="sub-tab active" onclick="switchSubTab('single')">Une Seule Machine</button>
-                <button class="sub-tab" onclick="switchSubTab('parallel')">Machines Parallèles</button>
-                <button class="sub-tab" onclick="switchSubTab('jobshop')">Job Shop</button>
-            </div>
-
-            <div id="single" class="sub-tab-content active">
-                <div class="algorithm-section">
-                    <button onclick="runScheduling('single', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
-                    <button onclick="runScheduling('single', 'EDD')"><i class="fas fa-calendar"></i> EDD</button>
-                    <button onclick="runScheduling('single', 'CR')"><i class="fas fa-balance-scale"></i> CR</button>
-                    <button onclick="runScheduling('single', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
-                    <button onclick="runScheduling('single', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
-                    <button onclick="runScheduling('single', 'EDM')"><i class="fas fa-clock"></i> EDM</button>
-                    <button onclick="runScheduling('single', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
-                    <button onclick="runScheduling('single', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
-                    <button onclick="runScheduling('single', 'ATC')"><i class="fas fa-dollar-sign"></i> ATC</button>
-                    <button onclick="runScheduling('single', 'MOD')"><i class="fas fa-calendar-alt"></i> MOD</button>
-                    <button onclick="runScheduling('single', 'MWKR')"><i class="fas fa-cubes"></i> MWKR</button>
                     <div class="auto-result" id="autoResultSingle">
                         <h4>Résultat Automatique</h4>
                         <select id="autoMetricSingle">
@@ -453,28 +429,65 @@
                             <option value="sumCompletion">Minimiser la Somme des Complétions</option>
                             <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
                         </select>
-                        <button onclick="autoCalculate('single')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <button class="optimize" onclick="autoCalculate('single')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
                         <div id="autoResultSingleText"></div>
                         <table id="autoComparisonSingle"></table>
                     </div>
+                    <div class="gantt-container" id="ganttContainerSingle"></div>
+                    <div id="metricsSingle" class="metrics-grid"></div>
                 </div>
-                <div class="gantt-container" id="ganttContainerSingle"></div>
-                <div id="metricsSingle" class="metrics-grid"></div>
             </div>
+        </div>
 
-            <div id="parallel" class="sub-tab-content">
-                <div class="algorithm-section">
-                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <i class="fas fa-sliders-h"></i> Nombre de Machines : 
-                        <input type="number" id="numMachines" value="2" min="1" max="10" step="1" onchange="updateMachineSpeeds()">
-                    </label>
-                    <button onclick="runScheduling('parallel', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
-                    <button onclick="runScheduling('parallel', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
-                    <button onclick="runScheduling('parallel', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
-                    <button onclick="runScheduling('parallel', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
-                    <button onclick="runScheduling('parallel', 'FCFS')"><i class="fas fa-sort-numeric-down"></i> FCFS</button>
-                    <button onclick="runScheduling('parallel', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
-                    <button onclick="runScheduling('parallel', 'HLF')"><i class="fas fa-layer-group"></i> HLF</button>
+        <div id="parallel" class="tab-content">
+            <div class="job-section">
+                <div class="job-input card">
+                    <h2>Configurer les Jobs</h2>
+                    <div class="checkbox-row">
+                        <label><input type="checkbox" id="chkProcessingTimeParallel" checked> <i class="fas fa-clock"></i> Temps de Traitement</label>
+                        <label><input type="checkbox" id="chkReleaseDateParallel" checked> <i class="fas fa-calendar-plus"></i> Date de Disponibilité</label>
+                        <label><input type="checkbox" id="chkWeightParallel" checked> <i class="fas fa-weight"></i> Poids</label>
+                        <label><input type="checkbox" id="chkDueDateParallel" checked> <i class="fas fa-calendar-check"></i> Date de Livraison</label>
+                    </div>
+                    <table id="jobTableParallel">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Temps de Traitement</th>
+                                <th>Date de Disponibilité</th>
+                                <th>Poids</th>
+                                <th>Date de Livraison</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobTableBodyParallel"></tbody>
+                    </table>
+                    <button id="addJobButtonParallel"><i class="fas fa-plus"></i> Ajouter Job</button>
+                    <button id="resetButtonParallel"><i class="fas fa-undo"></i> Réinitialiser</button>
+                    <div style="margin-top: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-sliders-h"></i> Nombre de Machines : 
+                            <input type="number" id="numMachinesParallel" value="2" min="1" max="10" step="1" onchange="updateMachineSpeedsParallel()">
+                        </label>
+                    </div>
+                    <div class="checkbox-row">
+                        <label><input type="checkbox" id="variableSpeedCheckboxParallel" onchange="toggleVariableSpeedsParallel()"> <i class="fas fa-tachometer-alt"></i> Vitesses Variables</label>
+                    </div>
+                    <div id="machineSpeedsContainerParallel" style="display: none;">
+                        <h4>Configuration des Vitesses</h4>
+                        <div id="speedInputsParallel"></div>
+                    </div>
+                </div>
+                <div class="job-output">
+                    <div class="algorithm-section">
+                        <button onclick="runScheduling('parallel', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                        <button onclick="runScheduling('parallel', 'WSPT')"><i class="fas fa-weight"></i> WSPT</button>
+                        <button onclick="runScheduling('parallel', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
+                        <button onclick="runScheduling('parallel', 'LST')"><i class="fas fa-hourglass"></i> LST</button>
+                        <button onclick="runScheduling('parallel', 'FCFS')"><i class="fas fa-sort-numeric-down"></i> FCFS</button>
+                        <button onclick="runScheduling('parallel', 'SRPT')"><i class="fas fa-tachometer-alt"></i> SRPT</button>
+                        <button onclick="runScheduling('parallel', 'HLF')"><i class="fas fa-layer-group"></i> HLF</button>
+                    </div>
                     <div class="auto-result" id="autoResultParallel">
                         <h4>Résultat Automatique</h4>
                         <select id="autoMetricParallel">
@@ -483,18 +496,44 @@
                             <option value="sumCompletion">Minimiser la Somme des Complétions</option>
                             <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
                         </select>
-                        <button onclick="autoCalculate('parallel')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <button class="optimize" onclick="autoCalculate('parallel')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
                         <div id="autoResultParallelText"></div>
                         <table id="autoComparisonParallel"></table>
                     </div>
+                    <div class="gantt-container" id="ganttContainerParallel"></div>
+                    <div id="metricsParallel" class="metrics-grid"></div>
                 </div>
-                <div class="gantt-container" id="ganttContainerParallel"></div>
-                <div id="metricsParallel" class="metrics-grid"></div>
             </div>
+        </div>
 
-            <div id="jobshop" class="sub-tab-content">
-                <div class="algorithm-section">
-                    <button onclick="runScheduling('jobshop', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+        <div id="jobshop" class="tab-content">
+            <div class="job-section">
+                <div class="job-input card">
+                    <h2>Configurer les Jobs</h2>
+                    <table id="jobShopTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre d'Opérations</th>
+                                <th>Opérations</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobShopTableBody"></tbody>
+                    </table>
+                    <button id="addJobShopButton"><i class="fas fa-plus"></i> Ajouter Job</button>
+                    <button id="resetJobShopButton"><i class="fas fa-undo"></i> Réinitialiser</button>
+                    <div class="setup-times-container">
+                        <h4>Temps de Setup par Machine</h4>
+                        <div id="setupTimesInputs"></div>
+                    </div>
+                </div>
+                <div class="job-output">
+                    <div class="algorithm-section">
+                        <button onclick="runScheduling('jobshop', 'SPT')"><i class="fas fa-sort-amount-down"></i> SPT</button>
+                        <button onclick="runScheduling('jobshop', 'EDD')"><i class="fas fa-calendar"></i> EDD</button>
+                        <button onclick="runScheduling('jobshop', 'LPT')"><i class="fas fa-sort-amount-up"></i> LPT</button>
+                    </div>
                     <div class="auto-result" id="autoResultJobshop">
                         <h4>Résultat Automatique</h4>
                         <select id="autoMetricJobshop">
@@ -503,13 +542,13 @@
                             <option value="sumCompletion">Minimiser la Somme des Complétions</option>
                             <option value="meanTardiness">Minimiser la Moyenne des Retards</option>
                         </select>
-                        <button onclick="autoCalculate('jobshop')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
+                        <button class="optimize" onclick="autoCalculate('jobshop')"><i class="fas fa-magic"></i> Calculer Automatiquement</button>
                         <div id="autoResultJobshopText"></div>
                         <table id="autoComparisonJobshop"></table>
                     </div>
+                    <div class="gantt-container" id="ganttContainerJobshop"></div>
+                    <div id="metricsJobshop" class="metrics-grid"></div>
                 </div>
-                <div class="gantt-container" id="ganttContainerJobshop"></div>
-                <div id="metricsJobshop" class="metrics-grid"></div>
             </div>
         </div>
 
@@ -517,48 +556,57 @@
     </div>
 
     <script>
-        let jobs = [
-            { id: 'J1', processing_time: 2, release_date: 0, weight: 1, due_date: 10 },
-            { id: 'J2', processing_time: 3, release_date: 1, weight: 1, due_date: 12 },
-            { id: 'J3', processing_time: 2, release_date: 2, weight: 2, due_date: 15 },
-            { id: 'J4', processing_time: 4, release_date: 0, weight: 3, due_date: 20 },
-            { id: 'J5', processing_time: 3, release_date: 1, weight: 2, due_date: 18 },
-            { id: 'J6', processing_time: 2, release_date: 3, weight: 1, due_date: 14 }
-        ];
-
-        let precedences = [];
-        let attributeChecks = {
+        let singleJobs = [];
+        let parallelJobs = [];
+        let jobShopJobs = [];
+        let attributeChecksSingle = {
             processing_time: true,
             release_date: true,
             weight: true,
             due_date: true
         };
-        let machineSpeeds = [1, 1];
+        let attributeChecksParallel = {
+            processing_time: true,
+            release_date: true,
+            weight: true,
+            due_date: true
+        };
+        let machineSpeedsParallel = [1, 1];
         let charts = {
             single: [],
             parallel: [],
             jobshop: []
         };
+        let setupTimes = {};
 
-        const industrialColors = [
-            '#1e40af', '#dc2626', '#059669', '#d97706', '#7c3aed',
-            '#db2777', '#0891b2', '#65a30d', '#ca8a04', '#be123c',
-            '#0f766e', '#7c2d12', '#581c87', '#9f1239', '#0e7490'
+        const vibrantColors = [
+            '#1E90FF', '#32CD32', '#FF4500', '#FFD700', '#00CED1',
+            '#FF69B4', '#7B68EE', '#20B2AA', '#FF6347', '#ADFF2F'
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('addJobButton').addEventListener('click', addJob);
-            document.getElementById('addPrecedenceButton').addEventListener('click', addPrecedence);
-            document.getElementById('resetButton').addEventListener('click', reset);
-            
-            document.getElementById('chkProcessingTime').addEventListener('change', (e) => updateAttributeCheck('processing_time', e.target.checked));
-            document.getElementById('chkReleaseDate').addEventListener('change', (e) => updateAttributeCheck('release_date', e.target.checked));
-            document.getElementById('chkWeight').addEventListener('change', (e) => updateAttributeCheck('weight', e.target.checked));
-            document.getElementById('chkDueDate').addEventListener('change', (e) => updateAttributeCheck('due_date', e.target.checked));
-            
-            displayJobs();
-            displayPrecedences();
-            updateMachineSpeeds();
+            document.getElementById('addJobButtonSingle').addEventListener('click', () => addJob('single'));
+            document.getElementById('resetButtonSingle').addEventListener('click', () => reset('single'));
+            document.getElementById('chkProcessingTimeSingle').addEventListener('change', (e) => updateAttributeCheck('single', 'processing_time', e.target.checked));
+            document.getElementById('chkReleaseDateSingle').addEventListener('change', (e) => updateAttributeCheck('single', 'release_date', e.target.checked));
+            document.getElementById('chkWeightSingle').addEventListener('change', (e) => updateAttributeCheck('single', 'weight', e.target.checked));
+            document.getElementById('chkDueDateSingle').addEventListener('change', (e) => updateAttributeCheck('single', 'due_date', e.target.checked));
+
+            document.getElementById('addJobButtonParallel').addEventListener('click', () => addJob('parallel'));
+            document.getElementById('resetButtonParallel').addEventListener('click', () => reset('parallel'));
+            document.getElementById('chkProcessingTimeParallel').addEventListener('change', (e) => updateAttributeCheck('parallel', 'processing_time', e.target.checked));
+            document.getElementById('chkReleaseDateParallel').addEventListener('change', (e) => updateAttributeCheck('parallel', 'release_date', e.target.checked));
+            document.getElementById('chkWeightParallel').addEventListener('change', (e) => updateAttributeCheck('parallel', 'weight', e.target.checked));
+            document.getElementById('chkDueDateParallel').addEventListener('change', (e) => updateAttributeCheck('parallel', 'due_date', e.target.checked));
+
+            document.getElementById('addJobShopButton').addEventListener('click', addJobShopJob);
+            document.getElementById('resetJobShopButton').addEventListener('click', resetJobShop);
+
+            displayJobs('single');
+            displayJobs('parallel');
+            displayJobShopJobs();
+            updateMachineSpeedsParallel();
+            updateSetupTimes();
         });
 
         function switchTab(tabId) {
@@ -568,57 +616,78 @@
             document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
         }
 
-        function switchSubTab(subTabId) {
-            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(subTabId).classList.add('active');
-            document.querySelector(`button[onclick="switchSubTab('${subTabId}')"]`).classList.add('active');
-        }
-
-        function updateAttributeCheck(attribute, checked) {
-            attributeChecks[attribute] = checked;
-            displayJobs();
+        function updateAttributeCheck(type, attribute, checked) {
+            if (type === 'single') {
+                attributeChecksSingle[attribute] = checked;
+                displayJobs('single');
+            } else if (type === 'parallel') {
+                attributeChecksParallel[attribute] = checked;
+                displayJobs('parallel');
+            }
             clearError();
         }
 
-        function displayJobs() {
-            const tbody = document.getElementById('jobTableBody');
+        function displayJobs(type) {
+            const jobs = type === 'single' ? singleJobs : parallelJobs;
+            const attributeChecks = type === 'single' ? attributeChecksSingle : attributeChecksParallel;
+            const tbody = document.getElementById(`jobTableBody${type.charAt(0).toUpperCase() + type.slice(1)}`);
             tbody.innerHTML = '';
+            if (jobs.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" style="color: #64748b; font-style: italic;">Aucun job défini.</td>';
+                tbody.appendChild(row);
+                return;
+            }
             jobs.forEach(job => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${job.id}</strong></td>
-                    <td><input type="number" min="0.1" step="0.1" value="${job.processing_time}" oninput="updateJob('${job.id}', 'processing_time', this.value)" ${!attributeChecks.processing_time ? 'disabled' : ''}></td>
-                    <td><input type="number" min="0" step="0.1" value="${job.release_date}" oninput="updateJob('${job.id}', 'release_date', this.value)" ${!attributeChecks.release_date ? 'disabled' : ''}></td>
-                    <td><input type="number" min="0.1" step="0.1" value="${job.weight}" oninput="updateJob('${job.id}', 'weight', this.value)" ${!attributeChecks.weight ? 'disabled' : ''}></td>
-                    <td><input type="number" min="0" step="0.1" value="${job.due_date}" oninput="updateJob('${job.id}', 'due_date', this.value)" ${!attributeChecks.due_date ? 'disabled' : ''}></td>
-                    <td><button onclick="removeJob('${job.id}')" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
+                    <td><input type="number" min="0.1" step="0.1" value="${job.processing_time || 1}" oninput="updateJob('${type}', '${job.id}', 'processing_time', this.value)" ${!attributeChecks.processing_time ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" step="0.1" value="${job.release_date || 0}" oninput="updateJob('${type}', '${job.id}', 'release_date', this.value)" ${!attributeChecks.release_date ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0.1" step="0.1" value="${job.weight || 1}" oninput="updateJob('${type}', '${job.id}', 'weight', this.value)" ${!attributeChecks.weight ? 'disabled' : ''}></td>
+                    <td><input type="number" min="0" step="0.1" value="${job.due_date || 10}" oninput="updateJob('${type}', '${job.id}', 'due_date', this.value)" ${!attributeChecks.due_date ? 'disabled' : ''}></td>
+                    <td><button onclick="removeJob('${type}', '${job.id}')" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        function displayPrecedences() {
-            const tbody = document.getElementById('precedenceTableBody');
+        function displayJobShopJobs() {
+            const tbody = document.getElementById('jobShopTableBody');
             tbody.innerHTML = '';
-            if (precedences.length === 0) {
+            if (jobShopJobs.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="3" style="color: #64748b; font-style: italic;">Aucune relation de précédence définie.</td>';
+                row.innerHTML = '<td colspan="4" style="color: #64748b; font-style: italic;">Aucun job défini.</td>';
                 tbody.appendChild(row);
                 return;
             }
-            precedences.forEach((prec, index) => {
+            jobShopJobs.forEach(job => {
                 const row = document.createElement('tr');
+                let operationsHtml = '<div class="operations-container">';
+                job.operations.forEach((op, idx) => {
+                    operationsHtml += `
+                        <div class="operation-row">
+                            Op${idx + 1}: 
+                            <label>Machine: <input type="number" min="1" step="1" value="${op.machine}" oninput="updateJobShopOperation('${job.id}', ${idx}, 'machine', this.value)"></label>
+                            <label>Durée: <input type="number" min="0.1" step="0.1" value="${op.duration}" oninput="updateJobShopOperation('${job.id}', ${idx}, 'duration', this.value)"></label>
+                        </div>
+                    `;
+                });
+                operationsHtml += '</div>';
                 row.innerHTML = `
-                    <td><input type="text" value="${prec.predecessor}" oninput="updatePrecedence(${index}, 'predecessor', this.value)"></td>
-                    <td><input type="text" value="${prec.job}" oninput="updatePrecedence(${index}, 'job', this.value)"></td>
-                    <td><button onclick="removePrecedence(${index})" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
+                    <td><strong>${job.id}</strong></td>
+                    <td><input type="number" min="1" max="10" step="1" value="${job.operations.length}" oninput="updateJobShopNumOperations('${job.id}', this.value)"></td>
+                    <td>${operationsHtml}</td>
+                    <td><button onclick="removeJobShopJob('${job.id}')" style="background: #dc3545;"><i class="fas fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });
+            updateSetupTimes();
         }
 
-        function updateJob(id, field, value) {
+        function updateJob(type, id, field, value) {
+            const jobs = type === 'single' ? singleJobs : parallelJobs;
+            const attributeChecks = type === 'single' ? attributeChecksSingle : attributeChecksParallel;
             if (!attributeChecks[field]) return;
             const job = jobs.find(j => j.id === id);
             const parsedValue = parseFloat(value);
@@ -628,66 +697,137 @@
             } else {
                 showError(`Valeur invalide pour ${field} du job ${id}.`);
             }
+            displayJobs(type);
         }
 
-        function updatePrecedence(index, field, value) {
-            const parsedValue = value.trim().toUpperCase();
-            if (jobs.some(j => j.id === parsedValue)) {
-                precedences[index][field] = parsedValue;
-                clearError();
-            } else {
-                showError(`ID de job invalide pour ${field} à l'index ${index}.`);
+        function updateJobShopNumOperations(id, value) {
+            const numOps = parseInt(value);
+            if (isNaN(numOps) || numOps < 1 || numOps > 10) {
+                showError("Le nombre d'opérations doit être entre 1 et 10.");
+                return;
             }
-            displayPrecedences();
+            const job = jobShopJobs.find(j => j.id === id);
+            const currentOps = job.operations.length;
+            if (numOps > currentOps) {
+                for (let i = currentOps; i < numOps; i++) {
+                    job.operations.push({ machine: 1, duration: 1 });
+                }
+            } else {
+                job.operations = job.operations.slice(0, numOps);
+            }
+            displayJobShopJobs();
         }
 
-        function addJob() {
-            const newId = String.fromCharCode(65 + jobs.length);
+        function updateJobShopOperation(id, opIndex, field, value) {
+            const job = jobShopJobs.find(j => j.id === id);
+            const parsedValue = parseFloat(value);
+            if (field === 'machine') {
+                if (isNaN(parsedValue) || parsedValue < 1) {
+                    showError("L'ID de la machine doit être un entier ≥ 1.");
+                    return;
+                }
+                job.operations[opIndex].machine = Math.round(parsedValue);
+            } else if (field === 'duration') {
+                if (isNaN(parsedValue) || parsedValue <= 0) {
+                    showError("La durée doit être > 0.");
+                    return;
+                }
+                job.operations[opIndex].duration = parsedValue;
+            }
+            clearError();
+            displayJobShopJobs();
+        }
+
+        function updateSetupTimes() {
+            const container = document.getElementById('setupTimesInputs');
+            container.innerHTML = '';
+            const machines = [...new Set(jobShopJobs.flatMap(job => job.operations.map(op => op.machine)))].sort((a, b) => a - b);
+            if (machines.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; font-style: italic;">Aucune machine définie.</p>';
+                return;
+            }
+            machines.forEach(machine => {
+                const div = document.createElement('div');
+                div.innerHTML = `<h5>Machine ${machine}</h5>`;
+                jobShopJobs.forEach(job => {
+                    const setupTime = setupTimes[`M${machine}-${job.id}`] || 0;
+                    const setupRow = document.createElement('div');
+                    setupRow.className = 'setup-row';
+                    setupRow.innerHTML = `
+                        <label>Job ${job.id}: <input type="number" min="0" step="0.1" value="${setupTime}" oninput="updateSetupTime('M${machine}', '${job.id}', this.value)"></label>
+                    `;
+                    div.appendChild(setupRow);
+                });
+                container.appendChild(div);
+            });
+        }
+
+        function updateSetupTime(machineId, jobId, value) {
+            const parsedValue = parseFloat(value);
+            if (isNaN(parsedValue) || parsedValue < 0) {
+                showError("Le temps de setup doit être ≥ 0.");
+                return;
+            }
+            setupTimes[`${machineId}-${jobId}`] = parsedValue;
+            clearError();
+        }
+
+        function addJob(type) {
+            const jobs = type === 'single' ? singleJobs : parallelJobs;
+            const newId = `J${jobs.length + 1}`;
             jobs.push({ id: newId, processing_time: 1, release_date: 0, weight: 1, due_date: 10 });
-            displayJobs();
+            displayJobs(type);
         }
 
-        function removeJob(id) {
+        function removeJob(type, id) {
+            const jobs = type === 'single' ? singleJobs : parallelJobs;
             if (jobs.length <= 1) {
                 showError("Vous devez conserver au moins un job.");
                 return;
             }
-            jobs = jobs.filter(job => job.id !== id);
-            precedences = precedences.filter(prec => prec.job !== id && prec.predecessor !== id);
-            displayJobs();
-            displayPrecedences();
-            clearError();
-        }
-
-        function addPrecedence() {
-            if (jobs.length < 2) {
-                showError("Vous devez avoir au moins deux jobs pour définir une relation de précédence.");
-                return;
+            if (type === 'single') {
+                singleJobs = singleJobs.filter(job => job.id !== id);
+            } else {
+                parallelJobs = parallelJobs.filter(job => job.id !== id);
             }
-            precedences.push({ job: jobs[0].id, predecessor: jobs[1].id });
-            displayPrecedences();
-        }
-
-        function removePrecedence(index) {
-            precedences.splice(index, 1);
-            displayPrecedences();
-        }
-
-        function reset() {
-            jobs = [
-                { id: 'J1', processing_time: 2, release_date: 0, weight: 1, due_date: 10 },
-                { id: 'J2', processing_time: 3, release_date: 1, weight: 1, due_date: 12 },
-                { id: 'J3', processing_time: 2, release_date: 2, weight: 2, due_date: 15 },
-                { id: 'J4', processing_time: 4, release_date: 0, weight: 3, due_date: 20 },
-                { id: 'J5', processing_time: 3, release_date: 1, weight: 2, due_date: 18 },
-                { id: 'J6', processing_time: 2, release_date: 3, weight: 1, due_date: 14 }
-            ];
-            precedences = [];
-            machineSpeeds = [1, 1];
-            displayJobs();
-            displayPrecedences();
-            updateMachineSpeeds();
+            displayJobs(type);
             clearError();
+        }
+
+        function addJobShopJob() {
+            const newId = `J${jobShopJobs.length + 1}`;
+            jobShopJobs.push({
+                id: newId,
+                operations: [{ machine: 1, duration: 1 }]
+            });
+            displayJobShopJobs();
+        }
+
+        function removeJobShopJob(id) {
+            jobShopJobs = jobShopJobs.filter(job => job.id !== id);
+            Object.keys(setupTimes).forEach(key => {
+                if (key.includes(id)) delete setupTimes[key];
+            });
+            displayJobShopJobs();
+        }
+
+        function reset(type) {
+            if (type === 'single') {
+                singleJobs = [];
+                displayJobs('single');
+            } else if (type === 'parallel') {
+                parallelJobs = [];
+                machineSpeedsParallel = [1, 1];
+                displayJobs('parallel');
+                updateMachineSpeedsParallel();
+            }
+            clearError();
+        }
+
+        function resetJobShop() {
+            jobShopJobs = [];
+            setupTimes = {};
+            displayJobShopJobs();
         }
 
         function showError(message) {
@@ -704,152 +844,130 @@
             errorDiv.style.display = 'none';
         }
 
-        function canExecute(job, completedJobs) {
-            const predecessors = precedences.filter(p => p.job === job.id).map(p => p.predecessor);
-            return predecessors.every(pred => completedJobs.includes(pred));
-        }
-
-        function compareJobs(a, b, rule, current_time) {
+        function compareJobs(a, b, rule, current_time, type) {
             let ruleValueA, ruleValueB;
 
-            if (rule === 'SPT' && attributeChecks.processing_time) {
+            if (rule === 'SPT') {
                 ruleValueA = a.processing_time || a.remaining_time;
                 ruleValueB = b.processing_time || b.remaining_time;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'EDD' && attributeChecks.due_date) {
-                ruleValueA = a.due_date;
-                ruleValueB = b.due_date;
+            } else if (rule === 'EDD') {
+                ruleValueA = a.due_date || Infinity;
+                ruleValueB = b.due_date || Infinity;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'CR' && attributeChecks.processing_time && attributeChecks.weight) {
-                ruleValueA = (a.processing_time || a.remaining_time) / a.weight;
-                ruleValueB = (b.processing_time || b.remaining_time) / b.weight;
+            } else if (rule === 'CR') {
+                ruleValueA = (a.processing_time || a.remaining_time) / (a.weight || 1);
+                ruleValueB = (b.processing_time || b.remaining_time) / (b.weight || 1);
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'WSPT' && attributeChecks.weight && attributeChecks.processing_time) {
-                ruleValueA = a.weight / (a.processing_time || a.remaining_time);
-                ruleValueB = b.weight / (b.processing_time || b.remaining_time);
+            } else if (rule === 'WSPT') {
+                ruleValueA = (a.weight || 1) / (a.processing_time || a.remaining_time);
+                ruleValueB = (b.weight || 1) / (b.processing_time || b.remaining_time);
                 return ruleValueB - ruleValueA;
-            } else if (rule === 'LPT' && attributeChecks.processing_time) {
+            } else if (rule === 'LPT') {
                 ruleValueA = a.processing_time || a.remaining_time;
                 ruleValueB = b.processing_time || b.remaining_time;
                 return ruleValueB - ruleValueA;
-            } else if (rule === 'EDM' && attributeChecks.release_date) {
-                ruleValueA = a.release_date;
-                ruleValueB = b.release_date;
+            } else if (rule === 'EDM') {
+                ruleValueA = a.release_date || 0;
+                ruleValueB = b.release_date || 0;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'LST' && attributeChecks.due_date && attributeChecks.processing_time) {
-                ruleValueA = a.due_date - (a.processing_time || a.remaining_time) - current_time;
-                ruleValueB = b.due_date - (b.processing_time || b.remaining_time) - current_time;
+            } else if (rule === 'LST') {
+                ruleValueA = (a.due_date || Infinity) - (a.processing_time || a.remaining_time) - current_time;
+                ruleValueB = (b.due_date || Infinity) - (b.processing_time || b.remaining_time) - current_time;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'SRPT' && attributeChecks.processing_time) {
+            } else if (rule === 'SRPT') {
                 ruleValueA = a.remaining_time || a.processing_time;
                 ruleValueB = b.remaining_time || b.processing_time;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'ATC' && attributeChecks.due_date && attributeChecks.processing_time && attributeChecks.weight) {
-                const avgProcessingTime = jobs.reduce((sum, job) => sum + (job.processing_time || job.remaining_time), 0) / jobs.length;
+            } else if (rule === 'ATC') {
+                const jobs = type === 'single' ? singleJobs : parallelJobs;
+                const avgProcessingTime = jobs.reduce((sum, job) => sum + (job.processing_time || job.remaining_time || 1), 0) / (jobs.length || 1);
                 const k = 2;
-                ruleValueA = (a.weight / (a.processing_time || a.remaining_time)) * Math.exp(-Math.max(0, (a.due_date - (a.processing_time || a.remaining_time) - current_time)) / (k * avgProcessingTime));
-                ruleValueB = (b.weight / (b.processing_time || b.remaining_time)) * Math.exp(-Math.max(0, (b.due_date - (b.processing_time || b.remaining_time) - current_time)) / (k * avgProcessingTime));
+                ruleValueA = ((a.weight || 1) / (a.processing_time || a.remaining_time || 1)) * Math.exp(-Math.max(0, ((a.due_date || Infinity) - (a.processing_time || a.remaining_time || 1) - current_time)) / (k * avgProcessingTime));
+                ruleValueB = ((b.weight || 1) / (b.processing_time || b.remaining_time || 1)) * Math.exp(-Math.max(0, ((b.due_date || Infinity) - (b.processing_time || b.remaining_time || 1) - current_time)) / (k * avgProcessingTime));
                 return ruleValueB - ruleValueA;
-            } else if (rule === 'MOD' && attributeChecks.due_date && attributeChecks.processing_time) {
-                ruleValueA = Math.max(a.due_date, current_time + (a.processing_time || a.remaining_time));
-                ruleValueB = Math.max(b.due_date, current_time + (b.processing_time || b.remaining_time));
+            } else if (rule === 'MOD') {
+                ruleValueA = Math.max(a.due_date || Infinity, current_time + (a.processing_time || a.remaining_time));
+                ruleValueB = Math.max(b.due_date || Infinity, current_time + (b.processing_time || b.remaining_time));
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'MWKR' && attributeChecks.processing_time) {
+            } else if (rule === 'MWKR') {
                 ruleValueA = a.processing_time || a.remaining_time;
                 ruleValueB = b.processing_time || b.remaining_time;
                 return ruleValueB - ruleValueA;
-            } else if (rule === 'FCFS' && attributeChecks.release_date) {
-                ruleValueA = a.release_date;
-                ruleValueB = b.release_date;
+            } else if (rule === 'FCFS') {
+                ruleValueA = a.release_date || 0;
+                ruleValueB = b.release_date || 0;
                 return ruleValueA - ruleValueB;
-            } else if (rule === 'HLF' && attributeChecks.processing_time) {
-                const getLevel = (job) => {
-                    let level = job.processing_time;
-                    const predecessors = precedences.filter(p => p.job === job.id).map(p => jobs.find(j => j.id === p.predecessor));
-                    if (predecessors.length > 0) {
-                        level += Math.max(...predecessors.map(getLevel));
-                    }
-                    return level;
-                };
-                ruleValueA = getLevel(a);
-                ruleValueB = getLevel(b);
+            } else if (rule === 'HLF') {
+                ruleValueA = a.processing_time;
+                ruleValueB = b.processing_time;
                 return ruleValueB - ruleValueA;
             }
 
             return 0;
         }
 
-        function singleMachineScheduling(jobs, rule, allowPreemption) {
-            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
+        function compareJobShopOperations(a, b, rule, current_time) {
+            let ruleValueA, ruleValueB;
+
+            if (rule === 'SPT') {
+                ruleValueA = a.duration;
+                ruleValueB = b.duration;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'EDD') {
+                const jobA = jobShopJobs.find(j => j.id === a.job_id);
+                const jobB = jobShopJobs.find(j => j.id === b.job_id);
+                ruleValueA = jobA.due_date || Infinity;
+                ruleValueB = jobB.due_date || Infinity;
+                return ruleValueA - ruleValueB;
+            } else if (rule === 'LPT') {
+                ruleValueA = a.duration;
+                ruleValueB = b.duration;
+                return ruleValueB - ruleValueA;
+            }
+
+            return 0;
+        }
+
+        function singleMachineScheduling(jobs, rule) {
+            if (!attributeChecksSingle.processing_time || !attributeChecksSingle.release_date) {
                 showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
                 return [];
             }
 
-            if (!allowPreemption) {
-                let schedule = [];
-                let current_time = 0;
-                let remaining_jobs = JSON.parse(JSON.stringify(jobs));
-                let completed_jobs = [];
+            let schedule = [];
+            let current_time = 0;
+            let remaining_jobs = JSON.parse(JSON.stringify(jobs)).map(job => ({
+                ...job,
+                remaining_time: job.processing_time
+            }));
 
-                while (remaining_jobs.length) {
-                    let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time && canExecute(j, completed_jobs));
-                    if (!available_jobs.length) {
-                        current_time = Math.min(...remaining_jobs.map(j => j.release_date));
-                        continue;
-                    }
-
-                    let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time))[0];
-
-                    let start_time = Math.max(current_time, selected_job.release_date);
-                    schedule.push({
-                        job_id: selected_job.id,
-                        start: start_time,
-                        duration: selected_job.processing_time,
-                        machine: 0
-                    });
-                    current_time = start_time + selected_job.processing_time;
-                    completed_jobs.push(selected_job.id);
-                    remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id);
+            while (remaining_jobs.length > 0) {
+                let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time);
+                if (available_jobs.length === 0) {
+                    current_time = Math.min(...remaining_jobs.map(j => j.release_date));
+                    continue;
                 }
-                return schedule;
-            } else {
-                let schedule = [];
-                let remaining_jobs = JSON.parse(JSON.stringify(jobs)).map(job => ({
-                    ...job,
-                    remaining_time: job.processing_time
-                }));
-                let current_time = 0;
-                let completed_jobs = [];
 
-                while (remaining_jobs.length) {
-                    let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time && j.remaining_time > 0 && canExecute(j, completed_jobs));
-                    if (!available_jobs.length) {
-                        current_time += 1;
-                        continue;
-                    }
+                let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time, 'single'))[0];
+                if (!selected_job) break;
 
-                    let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time))[0];
-
-                    schedule.push({
-                        job_id: selected_job.id,
-                        start: current_time,
-                        duration: 1,
-                        machine: 0
-                    });
-                    selected_job.remaining_time -= 1;
-                    current_time += 1;
-
-                    if (selected_job.remaining_time <= 0) {
-                        completed_jobs.push(selected_job.id);
-                        remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id || j.remaining_time > 0);
-                    }
-                }
-                return schedule;
+                let start_time = Math.max(current_time, selected_job.release_date);
+                schedule.push({
+                    job_id: selected_job.id,
+                    start: start_time,
+                    duration: selected_job.processing_time,
+                    machine: 1
+                });
+                current_time = start_time + selected_job.processing_time;
+                remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id);
             }
+
+            return schedule;
         }
 
-        function parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, speeds) {
-            if (!attributeChecks.processing_time) {
+        function parallelMachinesScheduling(jobs, rule, num_machines, speeds) {
+            if (!attributeChecksParallel.processing_time) {
                 showError("Temps de Traitement doit être coché.");
                 return [];
             }
@@ -872,207 +990,168 @@
                 processing_time: job.processing_time
             }));
 
-            if (!allowPreemption) {
-                let schedule = [];
-                let remaining_jobs = JSON.parse(JSON.stringify(adjustedJobs));
-                let completed_jobs = [];
-                let machines = Array(num_machines).fill(null).map((_, index) => ({
-                    id: index,
-                    free_at: 0,
-                    speed: speeds[index] || 1
-                }));
+            let schedule = [];
+            let remaining_jobs = JSON.parse(JSON.stringify(adjustedJobs));
+            let machines = Array(num_machines).fill(null).map((_, index) => ({
+                id: index + 1,
+                free_at: 0,
+                speed: speeds[index] || 1
+            }));
 
-                while (remaining_jobs.length > 0) {
-                    let earliest_time = Math.min(...machines.map(m => m.free_at));
-                    let available_machines = machines.filter(m => m.free_at === earliest_time);
-                    let current_time = earliest_time;
+            while (remaining_jobs.length > 0) {
+                let earliest_time = Math.min(...machines.map(m => m.free_at));
+                let available_machines = machines.filter(m => m.free_at === earliest_time);
+                let current_time = earliest_time;
 
-                    let available_jobs = remaining_jobs.filter(job => canExecute(job, completed_jobs));
+                let available_jobs = remaining_jobs.filter(j => j.release_date <= current_time);
 
-                    if (available_jobs.length === 0) {
-                        if (remaining_jobs.length > 0) {
-                            current_time = Math.min(...machines.map(m => m.free_at));
-                            machines.forEach(m => {
-                                if (m.free_at < current_time) m.free_at = current_time;
-                            });
-                        }
-                        continue;
-                    }
-
-                    available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time));
-
-                    let jobs_to_assign = Math.min(available_jobs.length, available_machines.length);
-                    for (let i = 0; i < jobs_to_assign; i++) {
-                        let job = available_jobs[i];
-                        let machine = available_machines[i];
-                        let start_time = machine.free_at;
-
-                        let adjusted_duration = job.original_processing_time / machine.speed;
-
-                        schedule.push({
-                            job_id: job.id,
-                            start: start_time,
-                            duration: adjusted_duration,
-                            machine: machine.id
-                        });
-
-                        machine.free_at = start_time + adjusted_duration;
-                        completed_jobs.push(job.id);
-                    }
-
-                    remaining_jobs = remaining_jobs.filter(job => !completed_jobs.includes(job.id));
-                }
-
-                return schedule;
-            } else {
-                let schedule = [];
-                let remaining_jobs = JSON.parse(JSON.stringify(adjustedJobs)).map(job => ({
-                    ...job,
-                    remaining_time: job.original_processing_time
-                }));
-                let completed_jobs = [];
-                let machines = Array(num_machines).fill(null).map((_, index) => ({
-                    id: index,
-                    free_at: 0,
-                    current_job: null,
-                    speed: speeds[index] || 1
-                }));
-                let current_time = 0;
-                let maxIterations = 10000;
-                let iteration = 0;
-
-                while (remaining_jobs.length > 0 && iteration < maxIterations) {
-                    let available_machines = machines.filter(m => m.free_at <= current_time);
-                    if (available_machines.length === 0) {
+                if (available_jobs.length === 0) {
+                    if (remaining_jobs.length > 0) {
                         current_time = Math.min(...machines.map(m => m.free_at));
-                        continue;
-                    }
-
-                    let available_jobs = remaining_jobs.filter(job => job.remaining_time > 0 && canExecute(job, completed_jobs));
-                    if (available_jobs.length === 0) {
-                        current_time += 1;
-                        iteration++;
-                        continue;
-                    }
-
-                    available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time));
-
-                    for (let machine of available_machines) {
-                        if (available_jobs.length === 0) break;
-
-                        let selected_job = available_jobs[0];
-
-                        if (machine.current_job) {
-                            let currentJob = remaining_jobs.find(j => j.id === machine.current_job);
-                            if (currentJob && compareJobs(currentJob, selected_job, rule, current_time) > 0) {
-                                available_jobs.push(currentJob);
-                                machine.current_job = null;
-                            } else {
-                                continue;
-                            }
-                        }
-
-                        let adjusted_duration = 1 / machine.speed;
-
-                        schedule.push({
-                            job_id: selected_job.id,
-                            start: current_time,
-                            duration: 1,
-                            machine: machine.id
+                        machines.forEach(m => {
+                            if (m.free_at < current_time) m.free_at = current_time;
                         });
-
-                        selected_job.remaining_time -= adjusted_duration;
-                        machine.free_at = current_time + 1;
-                        machine.current_job = selected_job.id;
-
-                        if (selected_job.remaining_time <= 0) {
-                            completed_jobs.push(selected_job.id);
-                            machine.current_job = null;
-                        }
-
-                        available_jobs = available_jobs.filter(j => j.id !== selected_job.id || j.remaining_time > 0);
-                        remaining_jobs = remaining_jobs.filter(j => j.remaining_time > 0);
                     }
-
-                    current_time += 1;
-                    iteration++;
+                    continue;
                 }
 
-                if (iteration >= maxIterations) {
-                    showError("Boucle infinie détectée.");
-                    return [];
+                available_jobs.sort((a, b) => compareJobs(a, b, rule, current_time, 'parallel'));
+
+                let jobs_to_assign = Math.min(available_jobs.length, available_machines.length);
+                for (let i = 0; i < jobs_to_assign; i++) {
+                    let job = available_jobs[i];
+                    let machine = available_machines[i];
+                    let start_time = machine.free_at;
+
+                    let adjusted_duration = job.original_processing_time / machine.speed;
+
+                    schedule.push({
+                        job_id: job.id,
+                        start: start_time,
+                        duration: adjusted_duration,
+                        machine: machine.id
+                    });
+
+                    machine.free_at = start_time + adjusted_duration;
                 }
 
-                return schedule;
+                remaining_jobs = remaining_jobs.filter(job => !schedule.some(s => s.job_id === job.id));
             }
+
+            return schedule;
         }
 
         function jobShopScheduling(jobs, rule) {
-            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
-                showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
+            if (jobs.length === 0) {
+                showError("Aucun job défini pour le Job Shop.");
                 return [];
             }
 
             let schedule = [];
-            let machine_free_time = [0, 0];
-            let remaining_jobs = JSON.parse(JSON.stringify(jobs));
-            let completed_jobs = [];
-
-            while (remaining_jobs.length) {
-                let available_jobs = remaining_jobs.filter(j => j.release_date <= Math.min(...machine_free_time) && canExecute(j, completed_jobs));
-                if (!available_jobs.length) continue;
-
-                let selected_job = available_jobs.sort((a, b) => compareJobs(a, b, rule, Math.min(...machine_free_time)))[0];
-
-                for (let machine_id = 0; machine_id < 2; machine_id++) {
-                    let start_time = Math.max(machine_free_time[machine_id], selected_job.release_date);
-                    schedule.push({
-                        job_id: selected_job.id,
-                        start: start_time,
-                        duration: selected_job.processing_time,
-                        machine: machine_id
+            let operations = [];
+            jobs.forEach(job => {
+                job.operations.forEach((op, opIndex) => {
+                    operations.push({
+                        job_id: job.id,
+                        op_index: opIndex,
+                        machine: op.machine,
+                        duration: op.duration
                     });
-                    machine_free_time[machine_id] = start_time + selected_job.processing_time;
+                });
+            });
+
+            let machineFreeTime = {};
+            let jobOpProgress = jobs.reduce((acc, job) => {
+                acc[job.id] = 0;
+                return acc;
+            }, {});
+            let lastJobOnMachine = {};
+
+            while (operations.length > 0) {
+                let availableOps = operations.filter(op => {
+                    const job = jobs.find(j => j.id === op.job_id);
+                    const currentOpIndex = jobOpProgress[op.job_id];
+                    return op.op_index === currentOpIndex;
+                });
+
+                if (availableOps.length === 0) {
+                    break;
                 }
 
-                completed_jobs.push(selected_job.id);
-                remaining_jobs = remaining_jobs.filter(j => j.id !== selected_job.id);
+                availableOps.sort((a, b) => compareJobShopOperations(a, b, rule, Math.min(...Object.values(machineFreeTime).filter(t => t !== undefined))));
+
+                for (let op of availableOps) {
+                    const machineId = op.machine;
+                    if (!machineFreeTime[machineId]) machineFreeTime[machineId] = 0;
+
+                    let setupTime = 0;
+                    const lastJob = lastJobOnMachine[machineId];
+                    if (lastJob && lastJob !== op.job_id) {
+                        setupTime = setupTimes[`M${machineId}-${op.job_id}`] || 0;
+                    }
+
+                    let startTime = Math.max(machineFreeTime[machineId], 0) + setupTime;
+                    schedule.push({
+                        job_id: `${op.job_id}-Op${op.op_index + 1}`,
+                        start: startTime,
+                        duration: op.duration,
+                        machine: machineId
+                    });
+
+                    machineFreeTime[machineId] = startTime + op.duration;
+                    lastJobOnMachine[machineId] = op.job_id;
+                    jobOpProgress[op.job_id]++;
+
+                    operations = operations.filter(o => !(o.job_id === op.job_id && o.op_index === op.op_index));
+                }
             }
+
             return schedule;
         }
 
         function calculateMetrics(schedule, jobs, type) {
             const completionTimes = {};
             schedule.forEach(task => {
-                const jobId = task.job_id;
+                const jobId = type === 'jobshop' ? task.job_id.split('-')[0] : task.job_id;
                 const completionTime = task.start + task.duration;
-                if (type === 'jobshop') {
-                    if (!completionTimes[jobId] || completionTime > completionTimes[jobId]) {
-                        completionTimes[jobId] = completionTime;
-                    }
-                } else {
-                    if (!completionTimes[jobId] || completionTime > completionTimes[jobId]) {
-                        completionTimes[jobId] = completionTime;
-                    }
+                if (!completionTimes[jobId] || completionTime > completionTimes[jobId]) {
+                    completionTimes[jobId] = completionTime;
                 }
             });
 
-            const makespan = Math.max(...Object.values(completionTimes));
+            const makespan = Object.values(completionTimes).length > 0 ? Math.max(...Object.values(completionTimes)) : 0;
             let tardyJobs = 0, sumCompletion = 0, meanTardiness = 0;
-            if (attributeChecks.due_date) {
-                let totalTardiness = 0, numJobs = jobs.length;
-                jobs.forEach(job => {
-                    const completionTime = completionTimes[job.id];
-                    const tardiness = Math.max(0, completionTime - job.due_date);
+
+            if (type === 'jobshop') {
+                const jobIds = [...new Set(Object.keys(completionTimes).map(id => id.split('-')[0]))];
+                let totalTardiness = 0, numJobs = jobIds.length;
+                jobIds.forEach(jobId => {
+                    const completionTime = completionTimes[jobId] || 0;
+                    const job = jobs.find(j => j.id === jobId);
+                    const dueDate = job?.due_date || Infinity;
+                    const tardiness = Math.max(0, completionTime - dueDate);
                     if (tardiness > 0) tardyJobs++;
                     totalTardiness += tardiness;
                     sumCompletion += completionTime;
                 });
                 meanTardiness = numJobs > 0 ? totalTardiness / numJobs : 0;
             } else {
-                jobs.forEach(job => {
-                    sumCompletion += completionTimes[job.id];
-                });
+                const attributeChecks = type === 'single' ? attributeChecksSingle : attributeChecksParallel;
+                if (attributeChecks.due_date) {
+                    let totalTardiness = 0, numJobs = jobs.length;
+                    jobs.forEach(job => {
+                        const completionTime = completionTimes[job.id] || 0;
+                        const tardiness = Math.max(0, completionTime - (job.due_date || Infinity));
+                        if (tardiness > 0) tardyJobs++;
+                        totalTardiness += tardiness;
+                        sumCompletion += completionTime;
+                    });
+                    meanTardiness = numJobs > 0 ? totalTardiness / numJobs : 0;
+                } else {
+                    jobs.forEach(job => {
+                        sumCompletion += completionTimes[job.id] || 0;
+                    });
+                }
             }
 
             return {
@@ -1122,7 +1201,7 @@
 
             const uniqueJobs = [...new Set(schedule.map(task => task.job_id))];
 
-            for (let machine = 0; machine < num_machines; machine++) {
+            for (let machine = 1; machine <= num_machines; machine++) {
                 const machineSchedule = schedule.filter(task => task.machine === machine);
                 if (machineSchedule.length === 0) continue;
 
@@ -1130,7 +1209,7 @@
                 div.className = 'gantt-item';
                 div.innerHTML = `
                     <div class="machine-header">
-                        Machine ${machine + 1}
+                        Machine ${machine}
                         <button onclick="toggleGantt(this.parentElement.nextElementSibling)" style="margin-left: auto; background: #198754;">
                             <i class="fas fa-expand"></i> Détails
                         </button>
@@ -1149,17 +1228,20 @@
                     }
                     jobSegments[task.job_id].push({
                         x: [task.start, task.start + task.duration],
-                        y: machine + 1
+                        y: machine,
+                        start: task.start,
+                        duration: task.duration,
+                        end: task.start + task.duration
                     });
                 });
 
                 Object.keys(jobSegments).forEach(jobId => {
-                    const colorIndex = uniqueJobs.indexOf(jobId) % industrialColors.length;
+                    const colorIndex = uniqueJobs.indexOf(jobId) % vibrantColors.length;
                     datasets.push({
-                        label: `Job ${jobId}`,
+                        label: jobId,
                         data: jobSegments[jobId],
-                        backgroundColor: industrialColors[colorIndex],
-                        borderColor: industrialColors[colorIndex],
+                        backgroundColor: vibrantColors[colorIndex],
+                        borderColor: vibrantColors[colorIndex],
                         borderWidth: 1,
                         barPercentage: 0.9,
                         categoryPercentage: 1.0
@@ -1172,26 +1254,68 @@
                     options: {
                         indexAxis: 'y',
                         plugins: {
-                            title: { display: true, text: title, font: { size: 14 } },
-                            legend: { position: 'top', labels: { boxWidth: 10, padding: 5 } }
+                            title: {
+                                display: true,
+                                text: title,
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 10, padding: 5, font: { size: 12 } }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: { size: 12 },
+                                bodyFont: { size: 12 },
+                                padding: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        const data = context.raw;
+                                        return [
+                                            `Job: ${context.dataset.label}`,
+                                            `Start: ${data.start}`,
+                                            `End: ${data.end}`,
+                                            `Duration: ${data.duration}`
+                                        ];
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             x: {
                                 type: 'linear',
                                 min: 0,
                                 max: Math.ceil(makespan) + 1,
-                                title: { display: true, text: 'Temps (unités)', font: { size: 12 } },
-                                ticks: { stepSize: 1 }
+                                title: {
+                                    display: true,
+                                    text: 'Temps (unités)',
+                                    font: { size: 14 }
+                                },
+                                ticks: { stepSize: 1 },
+                                grid: {
+                                    display: true,
+                                    drawBorder: true,
+                                    drawOnChartArea: true,
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
                             },
                             y: {
                                 title: { display: false },
                                 ticks: {
                                     callback: function(value) {
                                         return value <= num_machines ? `M${value}` : '';
-                                    }
+                                    },
+                                    font: { size: 12 }
                                 },
                                 min: 0.5,
-                                max: num_machines + 0.5
+                                max: num_machines + 0.5,
+                                grid: { display: false }
+                            }
+                        },
+                        elements: {
+                            bar: {
+                                borderWidth: 1,
+                                borderRadius: 2
                             }
                         },
                         responsive: true,
@@ -1209,33 +1333,33 @@
             if (chartInstance) chartInstance.resize();
         }
 
-        function toggleVariableSpeeds() {
-            const checkbox = document.getElementById('variableSpeedCheckbox');
-            const container = document.getElementById('machineSpeedsContainer');
+        function toggleVariableSpeedsParallel() {
+            const checkbox = document.getElementById('variableSpeedCheckboxParallel');
+            const container = document.getElementById('machineSpeedsContainerParallel');
             container.style.display = checkbox.checked ? 'block' : 'none';
             if (checkbox.checked) {
-                updateMachineSpeeds();
+                updateMachineSpeedsParallel();
             } else {
-                const numMachines = parseInt(document.getElementById('numMachines').value) || 2;
-                machineSpeeds = Array(numMachines).fill(1);
+                const numMachines = parseInt(document.getElementById('numMachinesParallel').value) || 2;
+                machineSpeedsParallel = Array(numMachines).fill(1);
             }
         }
 
-        function updateMachineSpeeds() {
-            const numMachines = parseInt(document.getElementById('numMachines').value) || 2;
-            const container = document.getElementById('speedInputs');
+        function updateMachineSpeedsParallel() {
+            const numMachines = parseInt(document.getElementById('numMachinesParallel').value) || 2;
+            const container = document.getElementById('speedInputsParallel');
             container.innerHTML = '';
 
-            machineSpeeds = Array(numMachines).fill(1);
+            machineSpeedsParallel = Array(numMachines).fill(1);
 
-            if (document.getElementById('variableSpeedCheckbox').checked) {
+            if (document.getElementById('variableSpeedCheckboxParallel').checked) {
                 for (let i = 0; i < numMachines; i++) {
                     const div = document.createElement('div');
                     div.className = 'speed-input';
                     div.innerHTML = `
                         <label>
                             Vitesse Machine ${i + 1} : 
-                            <input type="number" min="0.1" step="0.1" value="1" onchange="updateMachineSpeed(${i}, this.value)">
+                            <input type="number" min="0.1" step="0.1" value="1" onchange="updateMachineSpeedParallel(${i}, this.value)">
                         </label>
                     `;
                     container.appendChild(div);
@@ -1243,10 +1367,10 @@
             }
         }
 
-        function updateMachineSpeed(machineId, value) {
+        function updateMachineSpeedParallel(machineId, value) {
             const speed = parseFloat(value);
             if (!isNaN(speed) && speed >= 0.1) {
-                machineSpeeds[machineId] = speed;
+                machineSpeedsParallel[machineId] = speed;
                 clearError();
             } else {
                 showError(`Vitesse invalide pour la machine ${machineId + 1}.`);
@@ -1254,29 +1378,29 @@
         }
 
         function runScheduling(type, rule) {
-            const allowPreemption = document.getElementById('preemptionCheckbox').checked;
             let schedule, title, num_machines = 1;
 
             if (type === 'single') {
-                schedule = singleMachineScheduling(jobs, rule, allowPreemption);
-                title = `Une Seule Machine - ${rule}${allowPreemption ? ' (Préemption)' : ''}`;
+                num_machines = 1;
+                schedule = singleMachineScheduling(singleJobs, rule);
+                title = `Une Seule Machine - ${rule}`;
             } else if (type === 'parallel') {
-                num_machines = parseInt(document.getElementById('numMachines').value) || 2;
+                num_machines = parseInt(document.getElementById('numMachinesParallel').value) || 2;
                 if (num_machines < 1) {
                     showError("Le nombre de machines doit être ≥ 1.");
                     return;
                 }
-                schedule = parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, machineSpeeds);
-                title = `Machines Parallèles (${num_machines} machines) - ${rule}${allowPreemption ? ' (Préemption)' : ''}`;
+                schedule = parallelMachinesScheduling(parallelJobs, rule, num_machines, machineSpeedsParallel);
+                title = `Machines Parallèles (${num_machines} machines) - ${rule}`;
             } else if (type === 'jobshop') {
-                schedule = jobShopScheduling(jobs, rule);
+                schedule = jobShopScheduling(jobShopJobs, rule);
+                num_machines = Math.max(...jobShopJobs.flatMap(job => job.operations.map(op => op.machine)), 1);
                 title = `Job Shop - ${rule}`;
-                num_machines = 2;
             }
 
             if (schedule.length > 0) {
                 drawGantt(schedule, title, num_machines, type);
-                const metrics = calculateMetrics(schedule, jobs, type);
+                const metrics = calculateMetrics(schedule, type === 'single' ? singleJobs : type === 'parallel' ? parallelJobs : jobShopJobs, type);
                 displayMetrics(metrics, type);
             }
         }
@@ -1287,52 +1411,61 @@
             const metricSelect = document.getElementById(`autoMetric${type.charAt(0).toUpperCase() + type.slice(1)}`);
             const selectedMetric = metricSelect.value;
 
-            if (!attributeChecks.processing_time || !attributeChecks.release_date) {
+            const attributeChecks = type === 'single' ? attributeChecksSingle : attributeChecksParallel;
+            const jobs = type === 'single' ? singleJobs : type === 'parallel' ? parallelJobs : jobShopJobs;
+
+            if (jobs.length === 0) {
+                showError("Aucun job défini pour le calcul automatique.");
+                return;
+            }
+
+            if (type !== 'jobshop' && (!attributeChecks.processing_time || !attributeChecks.release_date)) {
                 showError("Temps de Traitement et Date de Disponibilité doivent être cochés.");
                 return;
             }
-            if ((selectedMetric === 'tardyJobs' || selectedMetric === 'meanTardiness') && !attributeChecks.due_date) {
+            if ((selectedMetric === 'tardyJobs' || selectedMetric === 'meanTardiness') && type !== 'jobshop' && !attributeChecks.due_date) {
                 showError("La Date de Livraison doit être cochée pour calculer les retards.");
                 return;
             }
 
-            const allowPreemption = document.getElementById('preemptionCheckbox').checked;
             let rules, num_machines = 1;
             if (type === 'single') {
+                num_machines = 1;
                 rules = ['SPT', 'EDD', 'CR', 'WSPT', 'LPT', 'EDM', 'LST', 'SRPT', 'ATC', 'MOD', 'MWKR'];
             } else if (type === 'parallel') {
-                num_machines = parseInt(document.getElementById('numMachines').value) || 2;
+                num_machines = parseInt(document.getElementById('numMachinesParallel').value) || 2;
                 if (num_machines < 1) {
                     showError("Le nombre de machines doit être ≥ 1.");
                     return;
                 }
                 rules = ['SPT', 'WSPT', 'LPT', 'LST', 'FCFS', 'SRPT', 'HLF'];
             } else if (type === 'jobshop') {
-                num_machines = 2;
-                rules = ['SPT'];
+                rules = ['SPT', 'EDD', 'LPT'];
             }
 
             let bestRule = null;
-            let bestValue = Infinity;
+            let bestValue = selectedMetric === 'tardyJobs' || selectedMetric === 'makespan' || selectedMetric === 'sumCompletion' || selectedMetric === 'meanTardiness' ? Infinity : -Infinity;
             const results = {};
 
             rules.forEach(rule => {
                 let schedule;
                 if (type === 'single') {
-                    schedule = singleMachineScheduling(jobs, rule, allowPreemption);
+                    schedule = singleMachineScheduling(jobs, rule);
                 } else if (type === 'parallel') {
-                    schedule = parallelMachinesScheduling(jobs, rule, num_machines, allowPreemption, machineSpeeds);
+                    schedule = parallelMachinesScheduling(jobs, rule, num_machines, machineSpeedsParallel);
                 } else if (type === 'jobshop') {
                     schedule = jobShopScheduling(jobs, rule);
                 }
 
-                if (schedule.length > 0) {
+                if (schedule && schedule.length > 0) {
                     const metrics = calculateMetrics(schedule, jobs, type);
                     results[rule] = metrics;
-                    const value = metrics[selectedMetric];
-                    if (value < bestValue) {
-                        bestValue = value;
-                        bestRule = rule;
+                    const value = parseFloat(metrics[selectedMetric]);
+                    if (!isNaN(value)) {
+                        if (value < bestValue) {
+                            bestValue = value;
+                            bestRule = rule;
+                        }
                     }
                 }
             });
@@ -1356,7 +1489,7 @@
                 });
                 autoComparison.innerHTML = comparisonHtml;
             } else {
-                autoResultText.textContent = "Aucune règle valide n'a pu être calculée.";
+                autoResultText.textContent = "Aucune règle valide n'a pu être calculée. Vérifiez les données des jobs.";
             }
         }
 
